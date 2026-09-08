@@ -21,13 +21,22 @@ export default function LoginPage() {
 
   const handleSubmit = async () => {
   	try {
-    	await login({
+    	const currentUser=await login({
       	email: email,
       	password: password,
     	});
 
-    	router.push("/dashboard");
-  	} catch (error) {
+    		if(currentUser.role==="ADMIN"){
+				router.push("/dashboard");
+			}
+			else if(currentUser.role==="LIBRARIAN"){
+				router.push("/dashboard");
+			}
+			else if(currentUser.role==="MEMBER"){
+				router.push("/member");
+			}
+		}
+		catch (error) {
   			console.log(error);
   			alert("Login failed");
 		}
