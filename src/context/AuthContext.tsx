@@ -28,7 +28,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (data: LoginData) => Promise<void>;
+  login: (data: LoginData) => Promise<User>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
 };
@@ -77,6 +77,7 @@ export function AuthProvider({
     const currentUser = await getMe();
 
     setUser(currentUser);
+    return currentUser;
   };
 
   const register = async (data: RegisterData) => {
