@@ -46,11 +46,9 @@ export default function LoginPage() {
     <div className="bg-[#FAF3E9] text-foreground w-full h-screen overflow-hidden">
       <div className="flex w-full h-full">
 
-        {/* Login Section */}
         <div className="flex justify-center items-center w-full h-full p-6">
           <div className="flex flex-col w-full max-w-[400px]">
 
-            {/* Logo */}
             <div className="flex items-center gap-2">
               <div className="rounded-lg bg-linear-135/srgb from-[#D97748] to-[#B94E3D] flex justify-center items-center size-10">
                 <BookOpen className="text-white size-5" />
@@ -67,7 +65,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Heading */}
             <h1 className="font-semibold text-[#2E211A] text-3xl mt-4">
               Welcome back
             </h1>
@@ -76,7 +73,6 @@ export default function LoginPage() {
               Sign in to manage your library
             </p>
 
-            {/* Email */}
             <label className="font-medium text-[#4A362A] text-[13px] mb-2">
               Email address
             </label>
@@ -89,7 +85,6 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            {/* Password */}
             <label className="font-medium text-[#4A362A] text-[13px] mt-4 mb-2">
               Password
             </label>
@@ -116,7 +111,6 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Remember Me / Forgot Password */}
             <div className="flex mt-3 justify-between items-center">
 
               <label className="cursor-pointer flex items-center gap-2">
@@ -140,7 +134,6 @@ export default function LoginPage() {
 
             </div>
 
-            {/* Login Button */}
             <button
               type="button"
               className="font-semibold transition-all duration-150 ease-out shadow-[0px_1px_3px_rgba(0,_0,_0,_0.1),_0px_1px_2px_-1px_rgba(0,_0,_0,_0.1)] rounded-lg bg-[#D97748] text-white text-[15px] mt-4 w-full h-12"
@@ -149,8 +142,7 @@ export default function LoginPage() {
               Log In
             </button>
 
-            {/* OR */}
-            <div className="flex mt-4 items-center gap-4">
+\            <div className="flex mt-4 items-center gap-4">
               <div className="bg-[#E6D8C5] flex-1 h-px" />
 
               <span className="text-[#A8988A] text-xs">
@@ -160,7 +152,6 @@ export default function LoginPage() {
               <div className="bg-[#E6D8C5] flex-1 h-px" />
             </div>
 
-            {/* Google Login */}
             <button
               type="button"
               className="font-medium transition-all rounded-lg bg-white text-[#2E211A] text-sm border border-[#D8C9B8] flex mt-4 justify-center items-center gap-2 w-full h-12"
@@ -172,7 +163,6 @@ export default function LoginPage() {
               Continue with Google
             </button>
 
-            {/* Register */}
             <p className="text-center text-[#6B5B4D] text-sm mt-3">
               Don't have an account?
 
