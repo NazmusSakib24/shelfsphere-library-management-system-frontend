@@ -12,14 +12,16 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const bypassAuth = process.env.NODE_ENV === "development";
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!bypassAuth && !loading && !user) {
         router.push("/login");
         return;
     }
 
     if (
+        !bypassAuth &&
         !loading &&
         user &&
         user.role !== "ADMIN" &&
@@ -27,13 +29,13 @@ export default function DashboardLayout({
     ) {
         router.push("/member");
     }
-    }, [loading, user, router]);
+    }, [bypassAuth, loading, user, router]);
 
-  if (loading) {
+  if (loading && !bypassAuth) {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
+  if (!user && !bypassAuth) {
     return null;
   }
 
