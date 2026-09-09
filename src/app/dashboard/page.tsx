@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isAxiosError } from "axios";
 import {
   FiBook,
   FiUsers,
@@ -38,17 +39,17 @@ export default function DashboardPage() {
         console.log("Dashboard data:", data);
 
         setStats(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(
           "Dashboard API error:",
           error
         );
 
-        if (error?.response?.status === 401) {
+        if (isAxiosError(error) && error.response?.status === 401) {
           setError(
             "You are not authenticated. Please login."
           );
-        } else if (error?.response?.status === 403) {
+        } else if (isAxiosError(error) && error.response?.status === 403) {
           setError(
             "You do not have permission to view the dashboard."
           );
