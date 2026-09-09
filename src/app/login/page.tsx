@@ -142,7 +142,7 @@ export default function LoginPage() {
               Log In
             </button>
 
-\            <div className="flex mt-4 items-center gap-4">
+           <div className="flex mt-4 items-center gap-4">
               <div className="bg-[#E6D8C5] flex-1 h-px" />
 
               <span className="text-[#A8988A] text-xs">
