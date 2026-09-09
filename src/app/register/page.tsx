@@ -102,8 +102,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="bg-orange-50 flex w-full min-h-screen">
-      <div className="flex p-12 justify-center items-center w-3/5">
+    <div className="bg-orange-50 flex w-full h-screen overflow-hidden">
+      <div className="flex p-4 justify-center items-center w-3/5">
         <div className="flex flex-col w-full max-w-md">
 
           <div className="flex items-center gap-2">
@@ -122,11 +122,11 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <h1 className="font-semibold text-gray-800 text-3xl mt-8">
+          <h1 className="font-semibold text-gray-800 text-3xl mt-6">
             Create your account
           </h1>
 
-          <p className="text-gray-600 text-sm mt-2 mb-6">
+          <p className="text-gray-600 text-sm mt-2 mb-4">
             Join ShelfSphere to start managing your library
           </p>
 
@@ -146,7 +146,7 @@ export default function RegisterPage() {
               <input
                 type="text"
                 placeholder="Enter your full name"
-                className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none px-3 w-full h-12"
+                className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none px-3 w-full h-10"
                 value={fullName}
                 onChange={(e) =>
                   setFullName(e.target.value)
@@ -160,7 +160,7 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="flex mt-4 flex-col gap-2">
+            <div className="flex mt-2 flex-col gap-2">
               <label className="font-medium text-gray-700 text-sm">
                 Email address
               </label>
@@ -168,7 +168,7 @@ export default function RegisterPage() {
               <input
                 type="email"
                 placeholder="you@library.com"
-                className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none px-3 w-full h-12"
+                className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none px-3 w-full h-10"
                 value={email}
                 onChange={(e) =>
                   setEmail(e.target.value)
@@ -182,7 +182,7 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="flex mt-4 flex-col gap-2">
+            <div className="flex mt-2 flex-col gap-2">
               <label className="font-medium text-gray-700 text-sm">
                 Password
               </label>
@@ -193,7 +193,7 @@ export default function RegisterPage() {
                     showPassword ? "text" : "password"
                   }
                   placeholder="Enter your password"
-                  className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none pr-10 pl-3 w-full h-12"
+                  className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none pr-10 pl-3 w-full h-10"
                   value={password}
                   onChange={(e) =>
                     setPassword(e.target.value)
@@ -222,7 +222,7 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="flex mt-4 flex-col gap-2">
+            <div className="flex mt-2 flex-col gap-2">
               <label className="font-medium text-gray-700 text-sm">
                 Confirm password
               </label>
@@ -235,7 +235,7 @@ export default function RegisterPage() {
                       : "password"
                   }
                   placeholder="Enter your password"
-                  className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none pr-10 pl-3 w-full h-12"
+                  className="rounded-lg bg-white text-gray-800 text-sm border border-gray-300 outline-none pr-10 pl-3 w-full h-10"
                   value={confirmPassword}
                   onChange={(e) =>
                     setConfirmPassword(e.target.value)
@@ -268,14 +268,14 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              className="font-medium rounded-lg bg-orange-500 text-white text-sm mt-6 w-full h-12"
+              className="font-medium rounded-lg bg-orange-500 text-white text-sm mt-4 w-full h-10"
             >
               Create Account
             </button>
 
           </form>
 
-          <p className="text-center text-gray-600 text-sm mt-6">
+          <p className="text-center text-gray-600 text-sm mt-4">
             Already have an account?
 
             <button
@@ -290,7 +290,7 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="bg-gray-50 flex p-12 justify-center items-center w-2/5">
+      <div className="bg-gray-50 flex p-4 justify-center items-center w-2/5">
         <div className="text-center">
           <h2 className="font-semibold text-gray-800 text-2xl">
             Join the shelf.
