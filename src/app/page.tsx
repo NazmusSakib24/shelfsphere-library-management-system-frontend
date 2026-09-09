@@ -1,69 +1,60 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { ArrowRight, BookOpen, Library, Search, Sparkles, Users } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="min-h-screen overflow-hidden bg-[#f4f1ea]">
+      <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
+        <header className="flex items-center justify-between border-b border-[var(--line)] py-5">
+          <Link href="/" className="flex items-center gap-3" aria-label="ShelfSphere home">
+            <span className="brand-mark"><BookOpen size={18} /></span>
+            <span className="brand-name">ShelfSphere</span>
+          </Link>
+          <nav className="hidden items-center gap-8 text-sm md:flex">
+            <a href="#discover" className="nav-link">Discover</a>
+            <a href="#about" className="nav-link">About the library</a>
+            <Link href="/login" className="nav-link">Log in</Link>
+            <Link href="/register" className="button button-dark px-5">Join ShelfSphere <ArrowRight size={15} /></Link>
+          </nav>
+          <Link href="/login" className="button button-dark px-4 text-sm md:hidden">Log in</Link>
+        </header>
+
+        <section className="hero-shell">
+          <div className="hero-copy">
+            <div className="eyebrow"><span className="eyebrow-dot" /> Your library, in orbit</div>
+            <h1>Find your next <em>favorite</em> story.</h1>
+            <p className="hero-text">A calmer way to discover books, borrow with confidence, and keep your reading life beautifully organized.</p>
+            <div className="search-box"><Search size={17} /><span>Search the collection</span><span className="shortcut">⌘ K</span></div>
+            <div className="hero-actions">
+              <Link href="/register" className="button button-accent">Create your account <ArrowRight size={16} /></Link>
+              <Link href="/login" className="text-link">Already a member? Sign in <ArrowRight size={15} /></Link>
+            </div>
+          </div>
+
+          <div className="hero-art" aria-label="A stack of books in orbit" role="img">
+            <div className="orbit orbit-one" />
+            <div className="orbit orbit-two" />
+            <div className="book-stack" aria-hidden="true">
+              <div className="book book-bottom">THE ART OF<br />SLOW READING</div>
+              <div className="book book-middle">A FIELD GUIDE<br />TO WONDER</div>
+              <div className="book book-top">NEW<br />WORLDS</div>
+            </div>
+            <div className="art-caption"><span className="live-dot" /> A collection that keeps growing</div>
+          </div>
+        </section>
+
+        <section id="discover" className="metrics" aria-label="ShelfSphere highlights">
+          <div className="metric"><Library size={18} /><strong>1,200+</strong><span>stories to explore</span></div>
+          <div className="metric"><Users size={18} /><strong>800+</strong><span>curious members</span></div>
+          <div className="metric"><Sparkles size={18} /><strong>24/7</strong><span>your reading list</span></div>
+          <div id="about" className="metric metric-note"><span>Make room for<br /><strong>one more book.</strong></span><BookOpen size={20} /></div>
+        </section>
+
+        <footer className="flex flex-col gap-3 py-8 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between">
+          <span>© 2026 ShelfSphere Library</span>
+          <span>Read widely. Return happily.</span>
+        </footer>
+      </div>
+    </main>
   );
 }

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,11 +19,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const handleSubmit = async () => {
   	try {
     	const currentUser=await login({
-      	email: email,
+      	email: email.trim().toLowerCase(),
       	password: password,
     	});
 
@@ -33,12 +35,19 @@ export default function LoginPage() {
 				router.push("/dashboard");
 			}
 			else if(currentUser.role==="MEMBER"){
-				router.push("/member");
+				router.push("/dashboard/member");
 			}
 		}
 		catch (error) {
-  			console.log(error);
-  			alert("Login failed");
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined;
+
+      setLoginError(
+        Array.isArray(message)
+          ? message[0]
+          : message || "Login failed. Check your email and password.",
+      );
 		}
 	};
 
@@ -72,6 +81,12 @@ export default function LoginPage() {
             <p className="text-[#6B5B4D] text-[15px] mt-1 mb-4">
               Sign in to manage your library
             </p>
+
+            {loginError && (
+              <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                {loginError}
+              </p>
+            )}
 
             <label className="font-medium text-[#4A362A] text-[13px] mb-2">
               Email address
@@ -164,7 +179,7 @@ export default function LoginPage() {
             </button>
 
             <p className="text-center text-[#6B5B4D] text-sm mt-3">
-              Don't have an account?
+              Don&apos;t have an account?
 
               <button
                 type="button"

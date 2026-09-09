@@ -49,7 +49,7 @@ export function AuthProvider({
     const token = localStorage.getItem("access_token");
 
     if (!token) {
-      setLoading(false);
+      queueMicrotask(() => setLoading(false));
       return;
     }
 

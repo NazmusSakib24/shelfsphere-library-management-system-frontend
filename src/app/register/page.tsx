@@ -4,6 +4,7 @@ import { z } from "zod";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 
 import {
   Eye,
@@ -43,6 +44,7 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+  const [submitError, setSubmitError] = useState("");
 
   const { register } = useAuth();
 
@@ -76,17 +78,26 @@ export default function RegisterPage() {
       password: "",
       confirmPassword: "",
     });
+    setSubmitError("");
 
     try {
       await register({
-        fullName,
-        email,
+        fullName: fullName.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
 
       router.push("/login");
     } catch (error) {
-      console.log(error);
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined;
+
+      setSubmitError(
+        Array.isArray(message)
+          ? message[0]
+          : message || "Registration failed. Please try again.",
+      );
     }
   };
 
@@ -120,6 +131,12 @@ export default function RegisterPage() {
           </p>
 
           <form onSubmit={handleSubmit}>
+
+            {submitError && (
+              <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                {submitError}
+              </p>
+            )}
 
             <div className="flex flex-col gap-2">
               <label className="font-medium text-gray-700 text-sm">

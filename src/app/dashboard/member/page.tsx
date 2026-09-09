@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FaBook,
   FaBookOpen,
@@ -27,6 +28,7 @@ import {
 } from "@/services/member-dashboard";
 
 export default function MemberDashboardPage() {
+  const router = useRouter();
   const [data, setData] =
     useState<MemberDashboard | null>(null);
 
@@ -64,7 +66,7 @@ export default function MemberDashboardPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   if (loading) {
