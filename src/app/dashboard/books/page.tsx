@@ -28,7 +28,7 @@ export default function BooksPage() {
   }, [search]);
 
   return (
-    <main className="min-h-screen bg-[#FAF3E9] px-6 pb-10 pt-24 text-[#4A362A] lg:ml-[264px] lg:px-8">
+    <main className="min-h-screen bg-[#FAF3E9] px-6 pb-10 pt-8 text-[#4A362A] lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-7"><h1 className="text-2xl font-bold">Books</h1><p className="mt-1 text-sm text-[#806F61]">Browse the live library catalogue.</p></div>
         <div className="mb-5 rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-4"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A08E7F]" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search title or author" className="w-full rounded-lg border border-[#E5D7C7] bg-[#FFFCF7] py-2.5 pl-10 pr-3 text-sm outline-none focus:border-[#C97B4A]" /></div></div>

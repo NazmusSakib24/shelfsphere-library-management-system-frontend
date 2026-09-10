@@ -2,6 +2,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FiBell,
   FiPlus,
@@ -10,9 +12,17 @@ import {
   FiUser,
   FiLogOut,
 } from "react-icons/fi";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DashboardHeader() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
 
   return (
     <header className="fixed left-[264px] right-0 top-0 z-30 flex h-[72px] items-center justify-between border-b border-[#E8DCC8] bg-[#FFF9F2] px-8">
@@ -55,11 +65,11 @@ export default function DashboardHeader() {
 
             <div className="hidden text-left lg:block">
               <p className="text-sm font-semibold text-[#2E211A]">
-                Admin
+                {user?.fullName || "Library user"}
               </p>
 
               <p className="text-xs text-[#8C7B6B]">
-                Administrator
+                {user?.role || "Member"}
               </p>
             </div>
 
@@ -68,12 +78,12 @@ export default function DashboardHeader() {
 
           {open && (
             <div className="absolute right-0 top-14 w-48 rounded-xl border border-[#E8DCC8] bg-white p-2 shadow-lg">
-              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#6B5B4D] hover:bg-[#F3EAE0]">
+              <Link href="/member" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#6B5B4D] hover:bg-[#F3EAE0]">
                 <FiUser />
-                Profile
-              </button>
+                View profile
+              </Link>
 
-              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#B23B2E] hover:bg-[#FDECEA]">
+              <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#B23B2E] hover:bg-[#FDECEA]">
                 <FiLogOut />
                 Logout
               </button>

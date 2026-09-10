@@ -9,8 +9,6 @@ import {
   FiDollarSign,
 } from "react-icons/fi";
 
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatCard from "@/components/dashboard/StatCard";
 import BorrowingActivity from "@/components/dashboard/BorrowingActivity";
 import TopCategories from "@/components/dashboard/TopCategories";
@@ -68,11 +66,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF3E9]">
-      <DashboardSidebar />
-
-      <DashboardHeader />
-
-      <main className="ml-[264px] pt-[72px]">
+      <main className="min-h-screen px-8 pb-10 pt-8">
         <div className="p-8">
 
           {/* Header */}
@@ -149,9 +143,7 @@ export default function DashboardPage() {
           <div className="mt-6 grid gap-6 xl:grid-cols-3">
 
             <div className="xl:col-span-2">
-              <BorrowingActivity
-                data={stats?.activity ?? []}
-              />
+              <BorrowingActivity />
             </div>
 
             <div>
