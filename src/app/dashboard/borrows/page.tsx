@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Bell,
   BookOpen,
@@ -105,10 +105,6 @@ export default function BorrowsPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    loadBorrows();
-  }, []);
 
   // =========================
   // STATS
@@ -215,25 +211,17 @@ export default function BorrowsPage() {
     ),
   );
 
-  const paginatedBorrows =
-    filteredBorrows.slice(
-      (currentPage - 1) *
-        itemsPerPage,
-      currentPage * itemsPerPage,
-    );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, activeTab]);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [
+  const displayPage = Math.min(
     currentPage,
     totalPages,
-  ]);
+  );
+
+  const paginatedBorrows =
+    filteredBorrows.slice(
+      (displayPage - 1) *
+        itemsPerPage,
+      displayPage * itemsPerPage,
+    );
 
   // =========================
   // RETURN BOOK
@@ -433,9 +421,10 @@ export default function BorrowsPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Search books, users, borrows..."
                 className="w-full rounded-xl border border-[#E5D7C7] bg-[#FFFCF7] py-3 pl-12 pr-4 text-sm text-[#4A362A] outline-none placeholder:text-[#A08E7F] focus:border-[#C97B4A]"
               />
@@ -447,7 +436,10 @@ export default function BorrowsPage() {
           <div className="mt-7">
             <BorrowTabs
               activeTab={activeTab}
-              onChange={setActiveTab}
+              onChange={(tab) => {
+                setActiveTab(tab);
+                setCurrentPage(1);
+              }}
             />
 
             <div className="mt-5">
@@ -489,7 +481,7 @@ export default function BorrowsPage() {
             filteredBorrows.length > 0 && (
               <div className="mt-5">
                 <BorrowPagination
-                  currentPage={currentPage}
+                  currentPage={displayPage}
                   totalPages={totalPages}
                   onPageChange={setCurrentPage}
                 />
