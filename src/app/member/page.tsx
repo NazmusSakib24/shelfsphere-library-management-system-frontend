@@ -149,9 +149,7 @@ export default function DashboardPage() {
           <div className="mt-6 grid gap-6 xl:grid-cols-3">
 
             <div className="xl:col-span-2">
-              <BorrowingActivity
-                data={stats?.activity ?? []}
-              />
+              <BorrowingActivity />
             </div>
 
             <div>

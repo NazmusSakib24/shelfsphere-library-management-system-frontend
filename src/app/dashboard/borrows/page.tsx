@@ -1,55 +1,77 @@
+
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
-  Bell,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  AlertTriangle,
   BookOpen,
-  Plus,
+  CalendarClock,
+  RefreshCw,
   Search,
 } from "lucide-react";
-
-import BorrowStats from "@/components/borrows/BorrowStats";
-import BorrowTabs from "@/components/borrows/BorrowTabs";
-import BorrowTable from "@/components/borrows/BorrowTable";
-import BorrowDetailsModal from "@/components/borrows/BorrowDetailsModal";
-import BorrowPagination from "@/components/borrows/BorrowPagination";
 
 import {
   getBorrows,
   returnBook,
 } from "@/services/borrows";
 
+import { getFines } from "@/services/fines";
+
 import {
+  BorrowFine,
   BorrowRecord,
-  BorrowDisplayStatus,
 } from "@/types/borrow";
 
-function getDisplayStatus(
+import BorrowTable from "@/components/borrows/BorrowTable";
+
+interface BorrowStats {
+  active: number;
+  dueToday: number;
+  overdue: number;
+}
+
+type TabType =
+  | "ALL"
+  | "DUE_SOON"
+  | "OVERDUE";
+
+function getStatus(
   borrow: BorrowRecord,
-): BorrowDisplayStatus {
+) {
   if (borrow.status === "RETURNED") {
     return "Returned";
   }
 
   const today = new Date();
-  const dueDate = new Date(borrow.dueDate);
+
+  const dueDate = new Date(
+    borrow.dueDate,
+  );
 
   today.setHours(0, 0, 0, 0);
   dueDate.setHours(0, 0, 0, 0);
 
-  if (dueDate < today) {
+  const diff =
+    dueDate.getTime() -
+    today.getTime();
+
+  const days = Math.ceil(
+    diff /
+      (1000 * 60 * 60 * 24),
+  );
+
+  if (days < 0) {
     return "Overdue";
   }
 
-  if (dueDate.getTime() === today.getTime()) {
+  if (days === 0) {
     return "Due Today";
   }
-
-  const difference =
-    dueDate.getTime() - today.getTime();
-
-  const days =
-    difference / (1000 * 60 * 60 * 24);
 
   if (days <= 3) {
     return "Due Soon";
@@ -59,39 +81,110 @@ function getDisplayStatus(
 }
 
 export default function BorrowsPage() {
-  const [borrows, setBorrows] = useState<
-    BorrowRecord[]
-  >([]);
+  const [borrows, setBorrows] =
+    useState<BorrowRecord[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] =
+    useState("");
 
   const [activeTab, setActiveTab] =
-    useState("all");
+    useState<TabType>("ALL");
+
+  const [returningId, setReturningId] =
+    useState<number | null>(null);
 
   const [selectedBorrow, setSelectedBorrow] =
     useState<BorrowRecord | null>(null);
 
-  const [currentPage, setCurrentPage] =
-    useState(1);
-
-  const itemsPerPage = 6;
-
-  // =========================
-  // LOAD BORROWS
-  // =========================
-
+  /*
+   * Load borrow records and fines.
+   *
+   * Backend:
+   * GET /borrows
+   * GET /fines
+   *
+   * We merge them on the frontend
+   * using:
+   *
+   * fine.borrowRecord.id
+   * =
+   * borrow.id
+   */
   const loadBorrows = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const data = await getBorrows();
+      const [
+        borrowData,
+        fineData,
+      ] = await Promise.all([
+        getBorrows(),
+        getFines(),
+      ]);
 
-      setBorrows(data);
+      /*
+       * Create a map:
+       *
+       * borrow ID -> fines[]
+       */
+      const finesByBorrowId =
+        new Map<
+          number,
+          BorrowFine[]
+        >();
+
+      fineData.forEach((fine) => {
+        const borrowId =
+          fine.borrowRecord?.id;
+
+        if (!borrowId) {
+          return;
+        }
+
+        const existing =
+          finesByBorrowId.get(
+            borrowId,
+          ) ?? [];
+
+        existing.push({
+          id: fine.id,
+          amount: fine.amount,
+          paid: fine.paid,
+          createdAt:
+            fine.createdAt,
+        });
+
+        finesByBorrowId.set(
+          borrowId,
+          existing,
+        );
+      });
+
+      /*
+       * Merge fines into borrows.
+       */
+      const mergedBorrows =
+        borrowData.map(
+          (borrow) => ({
+            ...borrow,
+
+            fines:
+              finesByBorrowId.get(
+                borrow.id,
+              ) ?? [],
+          }),
+        );
+
+      setBorrows(
+        mergedBorrows,
+      );
     } catch (err) {
       console.error(
         "Failed to load borrows:",
@@ -112,141 +205,149 @@ export default function BorrowsPage() {
     });
   }, []);
 
-  // =========================
-  // STATS
-  // =========================
+  /*
+   * Search + tab filtering
+   */
+  const filteredBorrows =
+    useMemo(() => {
+      let result = [...borrows];
 
-  const activeLoans = useMemo(() => {
-    return borrows.filter(
-      (borrow) =>
-        borrow.status === "BORROWED",
-    ).length;
-  }, [borrows]);
+      /*
+       * Search
+       */
+      if (search.trim()) {
+        const keyword =
+          search
+            .toLowerCase()
+            .trim();
 
-  const dueToday = useMemo(() => {
-    return borrows.filter(
-      (borrow) =>
-        getDisplayStatus(borrow) ===
-        "Due Today",
-    ).length;
-  }, [borrows]);
+        result =
+          result.filter(
+            (borrow) =>
+              borrow.book?.title
+                ?.toLowerCase()
+                .includes(
+                  keyword,
+                ) ||
+              borrow.book?.author
+                ?.toLowerCase()
+                .includes(
+                  keyword,
+                ) ||
+              borrow.member?.fullName
+                ?.toLowerCase()
+                .includes(
+                  keyword,
+                ) ||
+              borrow.member?.email
+                ?.toLowerCase()
+                .includes(
+                  keyword,
+                ),
+          );
+      }
 
-  const overdue = useMemo(() => {
-    return borrows.filter(
-      (borrow) =>
-        getDisplayStatus(borrow) ===
-        "Overdue",
-    ).length;
-  }, [borrows]);
+      /*
+       * Tabs
+       */
+      if (
+        activeTab ===
+        "DUE_SOON"
+      ) {
+        result =
+          result.filter(
+            (borrow) => {
+              const status =
+                getStatus(
+                  borrow,
+                );
 
-  // =========================
-  // SEARCH + TAB FILTER
-  // =========================
+              return (
+                status ===
+                  "Due Soon" ||
+                status ===
+                  "Due Today"
+              );
+            },
+          );
+      }
 
-  const filteredBorrows = useMemo(() => {
-    let result = [...borrows];
+      if (
+        activeTab ===
+        "OVERDUE"
+      ) {
+        result =
+          result.filter(
+            (borrow) =>
+              getStatus(
+                borrow,
+              ) === "Overdue",
+          );
+      }
 
-    // Search
-    if (search.trim()) {
-      const searchText =
-        search.toLowerCase();
+      return result;
+    }, [
+      borrows,
+      search,
+      activeTab,
+    ]);
 
-      result = result.filter((borrow) => {
-        const bookTitle =
-          borrow.book?.title?.toLowerCase() ||
-          "";
+  /*
+   * Statistics
+   */
+  const stats =
+    useMemo<BorrowStats>(() => {
+      return {
+        active:
+          borrows.filter(
+            (borrow) =>
+              borrow.status ===
+              "BORROWED",
+          ).length,
 
-        const author =
-          borrow.book?.author?.toLowerCase() ||
-          "";
+        dueToday:
+          borrows.filter(
+            (borrow) =>
+              getStatus(
+                borrow,
+              ) ===
+              "Due Today",
+          ).length,
 
-        const memberName =
-          borrow.member?.fullName?.toLowerCase() ||
-          "";
+        overdue:
+          borrows.filter(
+            (borrow) =>
+              getStatus(
+                borrow,
+              ) ===
+              "Overdue",
+          ).length,
+      };
+    }, [borrows]);
 
-        const email =
-          borrow.member?.email?.toLowerCase() ||
-          "";
-
-        return (
-          bookTitle.includes(searchText) ||
-          author.includes(searchText) ||
-          memberName.includes(searchText) ||
-          email.includes(searchText)
-        );
-      });
-    }
-
-    // Tabs
-    if (activeTab === "due-soon") {
-      result = result.filter((borrow) => {
-        const status =
-          getDisplayStatus(borrow);
-
-        return (
-          status === "Due Soon" ||
-          status === "Due Today"
-        );
-      });
-    }
-
-    if (activeTab === "overdue") {
-      result = result.filter(
-        (borrow) =>
-          getDisplayStatus(borrow) ===
-          "Overdue",
-      );
-    }
-
-    return result;
-  }, [
-    borrows,
-    search,
-    activeTab,
-  ]);
-
-  // =========================
-  // PAGINATION
-  // =========================
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      filteredBorrows.length /
-        itemsPerPage,
-    ),
-  );
-
-  const displayPage = Math.min(
-    currentPage,
-    totalPages,
-  );
-
-  const paginatedBorrows =
-    filteredBorrows.slice(
-      (displayPage - 1) *
-        itemsPerPage,
-      displayPage * itemsPerPage,
-    );
-
-  // =========================
-  // RETURN BOOK
-  // =========================
-
+  /*
+   * Return book
+   */
   const handleReturn = async (
     borrowId: number,
   ) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to return this book?",
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     try {
-      await returnBook(borrowId);
+      setReturningId(
+        borrowId,
+      );
 
+      await returnBook(
+        borrowId,
+      );
+
+      /*
+       * Reload borrows + fines.
+       *
+       * This is important because
+       * returning a late book can
+       * automatically create a fine
+       * in the backend.
+       */
       await loadBorrows();
     } catch (err) {
       console.error(
@@ -257,253 +358,465 @@ export default function BorrowsPage() {
       alert(
         "Failed to return the book.",
       );
+    } finally {
+      setReturningId(
+        null,
+      );
     }
   };
 
-  // =========================
-  // PAGE
-  // =========================
-
   return (
-    <div className="min-h-screen bg-[#FAF3E9] text-[#4A362A]">
-      {/* =========================
-          HEADER
-      ========================= */}
+    <div className="min-h-screen bg-[#FAF3E9] p-6">
+      {/* Header */}
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#4A362A]">
+            Borrow Management
+          </h1>
 
-      <header className="fixed left-[264px] right-0 top-0 z-30 h-[72px] border-b border-[#E8DCC8] bg-[#FFF9F1]">
-        <div className="flex h-full items-center justify-between px-8">
-          <div>
-            <h1 className="text-xl font-bold">
-              Borrows
-            </h1>
-
-            <p className="mt-1 text-xs text-[#806F61]">
-              Monitor and manage borrowed books
-            </p>
-          </div>
-
-          <div className="flex items-center gap-5">
-            <button className="relative rounded-lg p-2 text-[#806F61] hover:bg-[#F1E3D2]">
-              <Bell className="h-5 w-5" />
-
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#C97B4A]" />
-            </button>
-
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#C97B4A] text-sm font-bold text-white">
-              A
-            </div>
-          </div>
+          <p className="mt-1 text-sm text-[#7A6A5B]">
+            Monitor borrowed books,
+            due dates and fines.
+          </p>
         </div>
-      </header>
 
-      {/* =========================
-          SIDEBAR
-      ========================= */}
+        <button
+          type="button"
+          onClick={
+            loadBorrows
+          }
+          disabled={loading}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C97B4A] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#B86A3D] disabled:opacity-50"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${
+              loading
+                ? "animate-spin"
+                : ""
+            }`}
+          />
 
-      <aside className="fixed bottom-0 left-0 top-0 z-40 w-[264px] border-r border-[#E8DCC8] bg-[#F1E3D2]">
-        <div className="flex h-full flex-col">
-          {/* Logo */}
+          Refresh
+        </button>
+      </div>
 
-          <div className="flex h-[72px] items-center border-b border-[#E5D7C7] px-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#C97B4A] text-white">
-                <BookOpen className="h-5 w-5" />
-              </div>
-
-              <div>
-                <h2 className="font-bold text-[#4A362A]">
-                  ShelfSphere
-                </h2>
-
-                <p className="text-[11px] text-[#806F61]">
-                  Library Management
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-
-          <nav className="flex-1 space-y-1 px-4 py-6">
-            <a
-              href="/dashboard"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#806F61] hover:bg-[#E8D8C5]"
-            >
-              Dashboard
-            </a>
-
-            <a
-              href="/dashboard/books"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#806F61] hover:bg-[#E8D8C5]"
-            >
-              Books
-            </a>
-
-            <a
-              href="/dashboard/users"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#806F61] hover:bg-[#E8D8C5]"
-            >
-              Users
-            </a>
-
-            <a
-              href="/dashboard/borrows"
-              className="flex items-center gap-3 rounded-xl bg-[#C97B4A] px-4 py-3 text-sm font-semibold text-white shadow-sm"
-            >
-              Borrows
-            </a>
-
-            <a
-              href="/dashboard/reservations"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#806F61] hover:bg-[#E8D8C5]"
-            >
-              Reservations
-            </a>
-
-            <a
-              href="/dashboard/categories"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#806F61] hover:bg-[#E8D8C5]"
-            >
-              Categories
-            </a>
-
-            <a
-              href="/dashboard/fines"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#806F61] hover:bg-[#E8D8C5]"
-            >
-              Fines
-            </a>
-
-            <a
-              href="/dashboard/reports"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#806F61] hover:bg-[#E8D8C8] hover:bg-[#E8D8C5]"
-            >
-              Reports
-            </a>
-          </nav>
+      {/* Error */}
+      {error && (
+        <div className="mb-6 rounded-xl border border-[#E7B9B2] bg-[#FCE8E5] p-4 text-sm font-medium text-[#B23B2E]">
+          {error}
         </div>
-      </aside>
+      )}
 
-      {/* =========================
-          MAIN CONTENT
-      ========================= */}
-
-      <main className="ml-[264px] pt-[72px]">
-        <div className="p-8">
-          {/* Page heading */}
-
-          <div className="mb-7 flex items-center justify-between">
+      {/* Stats */}
+      <div className="mb-8 grid gap-5 md:grid-cols-3">
+        {/* Active */}
+        <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-6 shadow-sm">
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-[#4A362A]">
-                Borrow Management
-              </h2>
+              <p className="text-sm font-medium text-[#7A6A5B]">
+                Active Loans
+              </p>
 
-              <p className="mt-1 text-sm text-[#806F61]">
-                Track current loans, due dates,
-                returns and fines.
+              <p className="mt-2 text-3xl font-bold text-[#4A362A]">
+                {stats.active}
               </p>
             </div>
 
-            <button className="flex items-center gap-2 rounded-xl bg-[#C97B4A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#B96C3D]">
-              <Plus className="h-4 w-4" />
-              New Borrow
+            <div className="rounded-xl bg-[#F5EBDD] p-3">
+              <BookOpen className="h-6 w-6 text-[#C97B4A]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Due Today */}
+        <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[#7A6A5B]">
+                Due Today
+              </p>
+
+              <p className="mt-2 text-3xl font-bold text-[#4A362A]">
+                {stats.dueToday}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-[#FFF3D6] p-3">
+              <CalendarClock className="h-6 w-6 text-[#B08828]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Overdue */}
+        <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[#7A6A5B]">
+                Overdue
+              </p>
+
+              <p className="mt-2 text-3xl font-bold text-[#B23B2E]">
+                {stats.overdue}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-[#FCE8E5] p-3">
+              <AlertTriangle className="h-6 w-6 text-[#B23B2E]" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search + Tabs */}
+      <div className="mb-6 rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Search */}
+          <div className="relative w-full lg:max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9B8979]" />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value,
+                )
+              }
+              placeholder="Search book, borrower or email..."
+              className="w-full rounded-xl border border-[#D8C9B8] bg-[#FFFDF9] py-3 pl-10 pr-4 text-sm text-[#4A362A] outline-none transition placeholder:text-[#A89787] focus:border-[#C97B4A] focus:ring-2 focus:ring-[#C97B4A]/10"
+            />
+          </div>
+
+          {/* Tabs */}
+          <div className="flex rounded-xl bg-[#F5EBDD] p-1">
+            <button
+              type="button"
+              onClick={() =>
+                setActiveTab(
+                  "ALL",
+                )
+              }
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                activeTab ===
+                "ALL"
+                  ? "bg-[#FFFDF9] text-[#C97B4A] shadow-sm"
+                  : "text-[#7A6A5B]"
+              }`}
+            >
+              All Loans
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setActiveTab(
+                  "DUE_SOON",
+                )
+              }
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                activeTab ===
+                "DUE_SOON"
+                  ? "bg-[#FFFDF9] text-[#C97B4A] shadow-sm"
+                  : "text-[#7A6A5B]"
+              }`}
+            >
+              Due Soon
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setActiveTab(
+                  "OVERDUE",
+                )
+              }
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                activeTab ===
+                "OVERDUE"
+                  ? "bg-[#FFFDF9] text-[#C97B4A] shadow-sm"
+                  : "text-[#7A6A5B]"
+              }`}
+            >
+              Overdue
             </button>
           </div>
-
-          {/* Stats */}
-
-          <BorrowStats
-            activeLoans={activeLoans}
-            dueToday={dueToday}
-            overdue={overdue}
-          />
-
-          {/* Search */}
-
-          <div className="mt-7 rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-5">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#A08E7F]" />
-
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setCurrentPage(1);
-                }}
-                placeholder="Search books, users, borrows..."
-                className="w-full rounded-xl border border-[#E5D7C7] bg-[#FFFCF7] py-3 pl-12 pr-4 text-sm text-[#4A362A] outline-none placeholder:text-[#A08E7F] focus:border-[#C97B4A]"
-              />
-            </div>
-          </div>
-
-          {/* Tabs + table */}
-
-          <div className="mt-7">
-            <BorrowTabs
-              activeTab={activeTab}
-              onChange={(tab) => {
-                setActiveTab(tab);
-                setCurrentPage(1);
-              }}
-            />
-
-            <div className="mt-5">
-              {loading ? (
-                <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] py-16 text-center">
-                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[#E8DCC8] border-t-[#C97B4A]" />
-
-                  <p className="mt-4 text-sm text-[#806F61]">
-                    Loading borrow records...
-                  </p>
-                </div>
-              ) : error ? (
-                <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] px-6 py-12 text-center">
-                  <p className="font-medium text-[#B23B2E]">
-                    {error}
-                  </p>
-
-                  <button
-                    onClick={loadBorrows}
-                    className="mt-4 rounded-lg bg-[#C97B4A] px-4 py-2 text-sm font-semibold text-white"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              ) : (
-                <BorrowTable
-                  borrows={paginatedBorrows}
-                  onReturn={handleReturn}
-                  onDetails={setSelectedBorrow}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Pagination */}
-
-          {!loading &&
-            !error &&
-            filteredBorrows.length > 0 && (
-              <div className="mt-5">
-                <BorrowPagination
-                  currentPage={displayPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            )}
         </div>
-      </main>
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-12 text-center shadow-sm">
+          <RefreshCw className="mx-auto h-7 w-7 animate-spin text-[#C97B4A]" />
+
+          <p className="mt-3 text-sm text-[#7A6A5B]">
+            Loading borrow records...
+          </p>
+        </div>
+      ) : (
+        <BorrowTable
+          borrows={
+            filteredBorrows
+          }
+          onReturn={
+            handleReturn
+          }
+          onView={
+            setSelectedBorrow
+          }
+          returningId={
+            returningId
+          }
+        />
+      )}
 
       {/* Details Modal */}
+      {selectedBorrow && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() =>
+            setSelectedBorrow(
+              null,
+            )
+          }
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl bg-[#FFFDF9] p-6 shadow-xl"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-[#4A362A]">
+                Borrow Details
+              </h2>
 
-      <BorrowDetailsModal
-        borrow={selectedBorrow}
-        onClose={() =>
-          setSelectedBorrow(null)
-        }
-      />
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedBorrow(
+                    null,
+                  )
+                }
+                className="rounded-lg px-3 py-2 text-sm text-[#7A6A5B] hover:bg-[#F5EBDD]"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold uppercase text-[#9B8979]">
+                  Book
+                </p>
+
+                <p className="mt-1 font-semibold text-[#4A362A]">
+                  {
+                    selectedBorrow
+                      .book
+                      ?.title
+                  }
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase text-[#9B8979]">
+                  Borrower
+                </p>
+
+                <p className="mt-1 font-semibold text-[#4A362A]">
+                  {
+                    selectedBorrow
+                      .member
+                      ?.fullName
+                  }
+                </p>
+
+                <p className="text-sm text-[#7A6A5B]">
+                  {
+                    selectedBorrow
+                      .member
+                      ?.email
+                  }
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase text-[#9B8979]">
+                    Borrow Date
+                  </p>
+
+                  <p className="mt-1 text-sm text-[#4A362A]">
+                    {new Date(
+                      selectedBorrow.borrowedAt,
+                    ).toLocaleDateString(
+                      "en-GB",
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase text-[#9B8979]">
+                    Due Date
+                  </p>
+
+                  <p className="mt-1 text-sm text-[#4A362A]">
+                    {new Date(
+                      selectedBorrow.dueDate,
+                    ).toLocaleDateString(
+                      "en-GB",
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Fine Details */}
+              <div className="rounded-xl bg-[#F8F0E5] p-4">
+                <p className="mb-3 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
+                  Fine
+                </p>
+
+                {(() => {
+                  const fines = selectedBorrow.fines ?? [];
+
+                  /*
+                   * If an actual fine already exists,
+                   * show the actual fine.
+                   */
+                  if (fines.length > 0) {
+                    const totalFine = fines.reduce(
+                      (sum, fine) => sum + Number(fine.amount),
+                      0,
+                    );
+
+                    const hasUnpaidFine = fines.some(
+                      (fine) => !fine.paid,
+                    );
+
+                    return (
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-[#4A362A]">
+                            Total Fine
+                          </span>
+
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-bold ${
+                              hasUnpaidFine
+                                ? "bg-[#FCE8E5] text-[#B23B2E]"
+                                : "bg-[#EAF0E2] text-[#6B7A4F]"
+                            }`}
+                          >
+                            ৳{totalFine.toFixed(2)} {hasUnpaidFine ? "Unpaid" : "Paid"}
+                          </span>
+                        </div>
+
+                        <p className="mt-2 text-xs text-[#8A7868]">
+                          This is the actual fine recorded for this borrow.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  /*
+                   * No actual fine.
+                   * Calculate projected fine if the
+                   * book is returned today.
+                   */
+                  const today = new Date();
+                  const dueDate = new Date(selectedBorrow.dueDate);
+
+                  today.setHours(0, 0, 0, 0);
+                  dueDate.setHours(0, 0, 0, 0);
+
+                  const difference =
+                    today.getTime() - dueDate.getTime();
+
+                  const lateDays = Math.floor(
+                    difference / (1000 * 60 * 60 * 24),
+                  );
+
+                  /*
+                   * Book is not overdue.
+                   */
+                  if (lateDays <= 0) {
+                    return (
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-[#4A362A]">
+                            Current Fine
+                          </span>
+
+                          <span className="rounded-full bg-[#EAF0E2] px-3 py-1 text-xs font-bold text-[#6B7A4F]">
+                            ৳0.00
+                          </span>
+                        </div>
+
+                        <p className="mt-2 text-xs text-[#8A7868]">
+                          No fine would be imposed if the book is returned today.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  /*
+                   * Book is overdue.
+                   *
+                   * Fine = late days × ৳10
+                   */
+                  const projectedFine = lateDays * 10;
+
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-[#4A362A]">
+                          Estimated Fine
+                        </span>
+
+                        <span className="rounded-full bg-[#FFF3D6] px-3 py-1 text-xs font-bold text-[#B08828]">
+                          ৳{projectedFine.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 rounded-lg bg-[#FFFDF9] p-3">
+                        <div className="flex justify-between text-xs text-[#7A6A5B]">
+                          <span>Days overdue</span>
+
+                          <span className="font-semibold text-[#4A362A]">
+                            {lateDays} {lateDays === 1 ? "day" : "days"}
+                          </span>
+                        </div>
+
+                        <div className="mt-1 flex justify-between text-xs text-[#7A6A5B]">
+                          <span>Fine per day</span>
+
+                          <span className="font-semibold text-[#4A362A]">
+                            ৳10.00
+                          </span>
+                        </div>
+
+                        <div className="mt-2 border-t border-[#E8DCC8] pt-2">
+                          <div className="flex justify-between text-sm font-bold text-[#B08828]">
+                            <span>Estimated total</span>
+
+                            <span>৳{projectedFine.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="mt-2 text-xs text-[#8A7868]">
+                        This is the estimated fine if the book is returned today.
+                      </p>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+

@@ -6,6 +6,24 @@ const api = axios.create({
     "http://localhost:3000",
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      typeof window !== "undefined" &&
+      error.response?.status === 401
+    ) {
+      window.localStorage.removeItem("access_token");
+
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.assign("/login");
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = window.localStorage.getItem(

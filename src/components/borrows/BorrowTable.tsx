@@ -1,213 +1,269 @@
+
 "use client";
 
 import {
-  MoreHorizontal,
   RotateCcw,
+  Eye,
 } from "lucide-react";
 
-import { BorrowDisplayStatus, BorrowRecord } from "@/types/borrow";
+import { BorrowRecord } from "@/types/borrow";
 import FineBadge from "./FineBadge";
 
 interface BorrowTableProps {
   borrows: BorrowRecord[];
-  onReturn: (id: number) => void;
-  onDetails: (borrow: BorrowRecord) => void;
+
+  onReturn: (borrowId: number) => void;
+
+  onView: (borrow: BorrowRecord) => void;
+
+  returningId?: number | null;
 }
 
 function getDisplayStatus(
   borrow: BorrowRecord,
-): BorrowDisplayStatus {
+) {
   if (borrow.status === "RETURNED") {
-    return "Returned";
+    return {
+      label: "Returned",
+      className:
+        "bg-[#EAF0E2] text-[#6B7A4F]",
+    };
   }
 
   const today = new Date();
-  const dueDate = new Date(borrow.dueDate);
+
+  const dueDate = new Date(
+    borrow.dueDate,
+  );
 
   today.setHours(0, 0, 0, 0);
   dueDate.setHours(0, 0, 0, 0);
 
-  if (dueDate < today) {
-    return "Overdue";
-  }
-
-  if (dueDate.getTime() === today.getTime()) {
-    return "Due Today";
-  }
-
-  const difference =
-    dueDate.getTime() - today.getTime();
+  const diff =
+    dueDate.getTime() -
+    today.getTime();
 
   const days =
-    difference / (1000 * 60 * 60 * 24);
+    Math.ceil(
+      diff /
+        (1000 * 60 * 60 * 24),
+    );
+
+  if (days < 0) {
+    return {
+      label: "Overdue",
+      className:
+        "bg-[#FCE8E5] text-[#B23B2E]",
+    };
+  }
+
+  if (days === 0) {
+    return {
+      label: "Due Today",
+      className:
+        "bg-[#FFF3D6] text-[#B08828]",
+    };
+  }
 
   if (days <= 3) {
-    return "Due Soon";
+    return {
+      label: "Due Soon",
+      className:
+        "bg-[#FFF3D6] text-[#B08828]",
+    };
   }
 
-  return "Active";
-}
-
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString(
-    "en-GB",
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    },
-  );
-}
-
-function getStatusStyle(status: BorrowDisplayStatus) {
-  switch (status) {
-    case "Overdue":
-      return "bg-[#F4DDD8] text-[#B23B2E]";
-
-    case "Due Today":
-      return "bg-[#F5EBD2] text-[#B08828]";
-
-    case "Due Soon":
-      return "bg-[#F5EBD2] text-[#B08828]";
-
-    case "Returned":
-      return "bg-[#E8F0E3] text-[#6B7A4F]";
-
-    default:
-      return "bg-[#E8F0E3] text-[#6B7A4F]";
-  }
+  return {
+    label: "Active",
+    className:
+      "bg-[#E8F0E5] text-[#6B7A4F]",
+  };
 }
 
 export default function BorrowTable({
   borrows,
   onReturn,
-  onDetails,
+  onView,
+  returningId,
 }: BorrowTableProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9]">
+    <div className="overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px]">
-          <thead>
-            <tr className="border-b border-[#E8DCC8] bg-[#FCF7F0]">
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+        <table className="w-full min-w-[1000px] text-left">
+          <thead className="border-b border-[#E8DCC8] bg-[#F8F0E5]">
+            <tr>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Book
               </th>
 
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Borrower
               </th>
 
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Borrow Date
               </th>
 
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Due Date
               </th>
 
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Status
               </th>
 
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Fine
               </th>
 
-              <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+              <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Actions
               </th>
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-[#EFE5D8]">
             {borrows.length === 0 ? (
               <tr>
                 <td
                   colSpan={7}
-                  className="px-5 py-12 text-center text-sm text-[#806F61]"
+                  className="px-6 py-12 text-center text-sm text-[#7A6A5B]"
                 >
                   No borrow records found.
                 </td>
               </tr>
             ) : (
               borrows.map((borrow) => {
-                const displayStatus =
-                  getDisplayStatus(borrow);
+                const status =
+                  getDisplayStatus(
+                    borrow,
+                  );
 
                 return (
                   <tr
                     key={borrow.id}
-                    className="border-b border-[#EFE5D8] last:border-b-0 hover:bg-[#FFFAF4]"
+                    className="transition hover:bg-[#FFF9F1]"
                   >
-                    <td className="px-5 py-4">
+                    {/* Book */}
+                    <td className="px-6 py-5">
                       <div>
                         <p className="font-semibold text-[#4A362A]">
-                          {borrow.book.title}
+                          {borrow.book
+                            ?.title ??
+                            "Unknown Book"}
                         </p>
 
-                        <p className="mt-1 text-xs text-[#806F61]">
-                          {borrow.book.author}
+                        <p className="mt-1 text-xs text-[#8A7868]">
+                          {borrow.book
+                            ?.author ??
+                            "Unknown Author"}
                         </p>
                       </div>
                     </td>
 
-                    <td className="px-5 py-4">
+                    {/* Borrower */}
+                    <td className="px-6 py-5">
                       <div>
                         <p className="font-medium text-[#4A362A]">
-                          {borrow.member.fullName}
+                          {borrow.member
+                            ?.fullName ??
+                            "Unknown"}
                         </p>
 
-                        <p className="mt-1 text-xs text-[#806F61]">
-                          {borrow.member.email}
+                        <p className="mt-1 text-xs text-[#8A7868]">
+                          {borrow.member
+                            ?.email ??
+                            ""}
                         </p>
                       </div>
                     </td>
 
-                    <td className="px-5 py-4 text-sm text-[#5F5045]">
-                      {formatDate(borrow.borrowedAt)}
+                    {/* Borrow Date */}
+                    <td className="px-6 py-5 text-sm text-[#5E4B3D]">
+                      {new Date(
+                        borrow.borrowedAt,
+                      ).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
                     </td>
 
-                    <td className="px-5 py-4 text-sm text-[#5F5045]">
-                      {formatDate(borrow.dueDate)}
+                    {/* Due Date */}
+                    <td className="px-6 py-5 text-sm text-[#5E4B3D]">
+                      {new Date(
+                        borrow.dueDate,
+                      ).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
                     </td>
 
-                    <td className="px-5 py-4">
+                    {/* Status */}
+                    <td className="px-6 py-5">
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyle(
-                          displayStatus,
-                        )}`}
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${status.className}`}
                       >
-                        {displayStatus}
+                        {status.label}
                       </span>
                     </td>
 
-                    <td className="px-5 py-4">
-                      <FineBadge fines={borrow.fines} />
+                    {/* Fine */}
+                    <td className="px-6 py-5">
+                      <FineBadge
+                        borrow={borrow}
+                      />
                     </td>
 
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        {borrow.status === "BORROWED" && (
+                    {/* Actions */}
+                    <td className="px-6 py-5">
+                      <div className="flex justify-end gap-2">
+                        {/* View */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onView(
+                              borrow,
+                            )
+                          }
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[#D8C9B8] px-3 py-2 text-xs font-semibold text-[#5E4B3D] transition hover:bg-[#F5EBDD]"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+
+                          View
+                        </button>
+
+                        {/* Return */}
+                        {borrow.status ===
+                          "BORROWED" && (
                           <button
+                            type="button"
                             onClick={() =>
-                              onReturn(borrow.id)
+                              onReturn(
+                                borrow.id,
+                              )
                             }
-                            className="flex items-center gap-2 rounded-lg border border-[#D8C9B8] px-3 py-2 text-xs font-medium text-[#4A362A] transition hover:bg-[#F1E3D2]"
+                            disabled={
+                              returningId ===
+                              borrow.id
+                            }
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#C97B4A] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#B86A3D] disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            <RotateCcw className="h-4 w-4" />
-                            Return
+                            <RotateCcw className="h-3.5 w-3.5" />
+
+                            {returningId ===
+                            borrow.id
+                              ? "Returning..."
+                              : "Return"}
                           </button>
                         )}
-
-                        <button
-                          onClick={() =>
-                            onDetails(borrow)
-                          }
-                          className="rounded-lg p-2 text-[#806F61] transition hover:bg-[#F1E3D2] hover:text-[#4A362A]"
-                          title="View details"
-                        >
-                          <MoreHorizontal className="h-5 w-5" />
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -220,3 +276,4 @@ export default function BorrowTable({
     </div>
   );
 }
+

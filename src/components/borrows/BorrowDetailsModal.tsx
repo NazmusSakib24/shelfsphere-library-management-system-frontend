@@ -152,7 +152,7 @@ export default function BorrowDetailsModal({
 
               <div>
                 {hasFine ? (
-                  <FineBadge fines={borrow.fines} />
+                  <FineBadge borrow={borrow} />
                 ) : (
                   <span className="rounded-full bg-[#E8F0E3] px-3 py-1 text-xs font-medium text-[#6B7A4F]">
                     No Fine
