@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   BookOpen,
@@ -105,6 +105,12 @@ export default function BorrowsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      void loadBorrows();
+    });
+  }, []);
 
   // =========================
   // STATS
