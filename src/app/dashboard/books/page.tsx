@@ -3,31 +3,19 @@
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import {
-  ChangeEvent,
-  FormEvent,
-  useEffect,
+  ChangeEvent, FormEvent, useEffect,
   useMemo,
   useState,
 } from "react";
 
+
 import {
-  BookOpen,
-  Grid2X2,
-  List,
-  Pencil,
-  Plus,
-  Search,
-  Trash2,
-  Upload,
-  X,
-  ChevronDown,
+  BookOpen, Grid2X2, List, Pencil, Plus, Search,
+  Trash2,  Upload,  X, ChevronDown,
 } from "lucide-react";
 
 import {
-  createBook,
-  deleteBook,
-  getBooks,
-  updateBook,
+  createBook, deleteBook, getBooks, updateBook,
   uploadBookImage,
 } from "@/services/books";
 
@@ -42,9 +30,12 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:3000";
 
+
+
 export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -61,6 +52,8 @@ export default function BooksPage() {
 
   const [editingBook, setEditingBook] = useState<Book | null>(null);
 
+
+
   const [formData, setFormData] = useState({
     isbn: "",
     title: "",
@@ -70,11 +63,13 @@ export default function BooksPage() {
     categoryIds: [] as number[],
   });
 
+
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
-  /*
-   * Load books
-   */
+  
+
+
+
   useEffect(() => {
     const timer = window.setTimeout(async () => {
       try {
@@ -99,9 +94,10 @@ export default function BooksPage() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
-  /*
-   * Load categories
-   */
+  
+
+
+
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -118,13 +114,13 @@ export default function BooksPage() {
     loadCategories();
   }, []);
 
-  /*
-   * Filter and sort books
-   */
+  
+
+
   const filteredBooks = useMemo(() => {
     let result = [...books];
 
-    // Category filter
+    
     if (categoryFilter !== "all") {
       const selectedCategoryId = Number(categoryFilter);
 
@@ -135,7 +131,7 @@ export default function BooksPage() {
       );
     }
 
-    // Sorting
+  
     if (sortBy === "title") {
       result.sort((a, b) =>
         a.title.localeCompare(b.title)
@@ -165,9 +161,7 @@ export default function BooksPage() {
     return result;
   }, [books, categoryFilter, sortBy]);
 
-  /*
-   * Open Add Book form
-   */
+  
   const openAddForm = () => {
     setEditingBook(null);
 
@@ -184,9 +178,9 @@ export default function BooksPage() {
     setShowForm(true);
   };
 
-  /*
-   * Open Edit Book form
-   */
+  
+
+
   const openEditForm = (book: Book) => {
     setEditingBook(book);
 
@@ -206,9 +200,9 @@ export default function BooksPage() {
     setShowForm(true);
   };
 
-  /*
-   * Close form
-   */
+  
+
+
   const closeForm = () => {
     if (saving) return;
 
@@ -217,9 +211,10 @@ export default function BooksPage() {
     setSelectedImage(null);
   };
 
-  /*
-   * Handle input changes
-   */
+  
+
+
+
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -234,9 +229,10 @@ export default function BooksPage() {
     }));
   };
 
-  /*
-   * Handle category selection
-   */
+  
+
+
+  
   const handleCategoryChange = (categoryId: number) => {
     setFormData((previous) => {
       const alreadySelected =
@@ -257,9 +253,9 @@ export default function BooksPage() {
     });
   };
 
-  /*
-   * Handle image selection
-   */
+  
+
+
   const handleImageChange = (
     event: ChangeEvent<HTMLInputElement>
   ) => {
@@ -270,9 +266,10 @@ export default function BooksPage() {
     }
   };
 
-  /*
-   * Add / Update book
-   */
+ 
+
+
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -291,9 +288,10 @@ export default function BooksPage() {
         savedBook = await createBook(formData);
       }
 
-      /*
-       * Upload image if selected
-       */
+      
+
+
+
       if (selectedImage) {
         savedBook = await uploadBookImage(
           savedBook.id,
@@ -301,9 +299,10 @@ export default function BooksPage() {
         );
       }
 
-      /*
-       * Refresh book list
-       */
+    
+
+
+
       const result = await getBooks({
         search: search.trim() || undefined,
         limit: 100,
@@ -325,9 +324,10 @@ export default function BooksPage() {
     }
   };
 
-  /*
-   * Delete book
-   */
+  
+
+
+
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this book?"
@@ -352,9 +352,10 @@ export default function BooksPage() {
     }
   };
 
-  /*
-   * Availability status
-   */
+
+
+
+
   const getAvailability = (book: Book) => {
     if (book.availableCopies === 0) {
       return {
@@ -372,6 +373,8 @@ export default function BooksPage() {
       };
     }
 
+
+
     return {
       text: "Available",
       className:
@@ -379,20 +382,21 @@ export default function BooksPage() {
     };
   };
 
+
+
+
+
   return (
     <div className="min-h-screen bg-[#FAF3E9]">
       <DashboardSidebar />
       <DashboardHeader />
 
-      <main className="ml-[28px] pt-[70px]">
+      <main className="min-h-screen px-8 pb-10 pt-8">
         <div className="px-8 pb-12">
 
           <div className="mx-auto max-w-7xl">
 
-            {/* ================================================= */}
-            {/* PAGE HEADER */}
-            {/* ================================================= */}
-
+           
             <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 
               <div>
@@ -415,15 +419,13 @@ export default function BooksPage() {
 
             </div>
 
-            {/* ================================================= */}
-            {/* SEARCH + FILTERS */}
-            {/* ================================================= */}
+           
 
             <div className="mb-7 rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-5 shadow-sm">
 
               <div className="flex flex-col gap-4 lg:flex-row">
 
-                {/* Search */}
+                
                 <div className="relative flex-1">
 
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9B8A7A]" />
@@ -439,7 +441,9 @@ export default function BooksPage() {
 
                 </div>
 
-                {/* Category */}
+                
+
+
                 <div className="relative">
 
                   <select
@@ -469,7 +473,9 @@ export default function BooksPage() {
 
                 </div>
 
-                {/* Sort */}
+
+
+             
                 <div className="relative">
 
                   <select
@@ -500,7 +506,7 @@ export default function BooksPage() {
 
                 </div>
 
-                {/* View toggle */}
+                
                 <div className="flex items-center rounded-xl border border-[#E8DCC8] bg-[#FAF3E9] p-1">
 
                   <button
@@ -537,9 +543,7 @@ export default function BooksPage() {
 
             </div>
 
-            {/* ================================================= */}
-            {/* ERROR */}
-            {/* ================================================= */}
+           
 
             {error && (
               <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -547,10 +551,8 @@ export default function BooksPage() {
               </div>
             )}
 
-            {/* ================================================= */}
-            {/* BOOK COUNT */}
-            {/* ================================================= */}
-
+           
+           
             {!loading && books.length > 0 && (
               <div className="mb-4 flex items-center justify-between">
 
@@ -567,9 +569,9 @@ export default function BooksPage() {
               </div>
             )}
 
-            {/* ================================================= */}
-            {/* LOADING */}
-            {/* ================================================= */}
+            
+
+
 
             {loading ? (
               <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-16 text-center">
@@ -584,9 +586,9 @@ export default function BooksPage() {
 
             ) : filteredBooks.length === 0 ? (
 
-              /* ================================================= */
-              /* EMPTY STATE */
-              /* ================================================= */
+              
+
+
 
               <div className="rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] p-16 text-center">
 
@@ -608,9 +610,9 @@ export default function BooksPage() {
 
             ) : viewMode === "grid" ? (
 
-              /* ================================================= */
-              /* GRID VIEW */
-              /* ================================================= */
+              
+
+
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
@@ -624,7 +626,7 @@ export default function BooksPage() {
                       className="group overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                     >
 
-                      {/* Book Image */}
+                    
                       <div className="relative h-64 overflow-hidden bg-[#F1E7DA]">
 
                         {book.imageUrl ? (
@@ -639,7 +641,7 @@ export default function BooksPage() {
                           </div>
                         )}
 
-                        {/* Availability */}
+                      
                         <span
                           className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ${availability.className}`}
                         >
@@ -648,7 +650,7 @@ export default function BooksPage() {
 
                       </div>
 
-                      {/* Card Content */}
+                    
                       <div className="p-5">
 
                         <div className="mb-3">
@@ -663,7 +665,7 @@ export default function BooksPage() {
 
                         </div>
 
-                        {/* Categories */}
+                       
                         <div className="mb-4 flex min-h-6 flex-wrap gap-1.5">
 
                           {book.categories &&
@@ -686,7 +688,9 @@ export default function BooksPage() {
 
                         </div>
 
-                        {/* Availability */}
+
+
+                       
                         <div className="flex items-center justify-between border-t border-[#EFE5D8] pt-4">
 
                           <div>
@@ -700,7 +704,9 @@ export default function BooksPage() {
                             </p>
                           </div>
 
-                          {/* Actions */}
+                         
+
+
                           <div className="flex gap-1">
 
                             <button
@@ -737,9 +743,9 @@ export default function BooksPage() {
 
             ) : (
 
-              /* ================================================= */
-              /* LIST VIEW */
-              /* ================================================= */
+             
+
+
 
               <div className="overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9]">
 
@@ -883,9 +889,9 @@ export default function BooksPage() {
               </div>
             )}
 
-            {/* ================================================= */}
-            {/* FOOTER */}
-            {/* ================================================= */}
+            
+
+
 
             {!loading &&
               filteredBooks.length > 0 && (
@@ -904,16 +910,16 @@ export default function BooksPage() {
 
           </div>
 
-          {/* =================================================== */}
-          {/* ADD / EDIT MODAL */}
-          {/* =================================================== */}
+          
+
 
           {showForm && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
 
               <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] shadow-2xl">
 
-                {/* Modal Header */}
+               
+
                 <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#EFE5D8] bg-[#FFFDF9] px-6 py-5">
 
                   <div>
@@ -942,7 +948,7 @@ export default function BooksPage() {
 
                 </div>
 
-                {/* Form */}
+                
                 <form
                   onSubmit={handleSubmit}
                   className="space-y-5 p-6"
@@ -983,7 +989,7 @@ export default function BooksPage() {
 
                   </div>
 
-                  {/* ISBN + Copies */}
+                  
                   <div className="grid gap-5 sm:grid-cols-2">
 
                     <div>
@@ -1019,7 +1025,7 @@ export default function BooksPage() {
 
                   </div>
 
-                  {/* Description */}
+                  
                   <div>
 
                     <label className="mb-2 block text-sm font-semibold text-[#4A362A]">
@@ -1037,7 +1043,7 @@ export default function BooksPage() {
 
                   </div>
 
-                  {/* Categories */}
+                
                   <div>
 
                     <label className="mb-2 block text-sm font-semibold text-[#4A362A]">
@@ -1091,7 +1097,7 @@ export default function BooksPage() {
 
                   </div>
 
-                  {/* Image Upload */}
+                  
                   <div>
 
                     <label className="mb-2 block text-sm font-semibold text-[#4A362A]">
@@ -1135,7 +1141,7 @@ export default function BooksPage() {
 
                   </div>
 
-                  {/* Buttons */}
+                 
                   <div className="flex justify-end gap-3 border-t border-[#EFE5D8] pt-5">
 
                     <button
