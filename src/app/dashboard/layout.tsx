@@ -18,16 +18,14 @@ export default function DashboardLayout({
 
   const { user, loading } = useAuth();
 
-  const bypassAuth =
-    process.env.NODE_ENV === "development";
 
   useEffect(() => {
-    if (!bypassAuth && !loading && !user) {
+    if (!loading && !user) {
       router.push("/login");
       return;
     }
 
-    if (!bypassAuth && !loading && user) {
+    if (!loading && user) {
       const isMemberDashboard =
         pathname === "/dashboard/member";
 
@@ -45,34 +43,33 @@ export default function DashboardLayout({
       }
     }
   }, [
-    bypassAuth,
+    
     loading,
     pathname,
     user,
     router,
   ]);
 
-  if (loading && !bypassAuth) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (!user && !bypassAuth) {
+  if (!user) {
     return null;
   }
 
-  // The member dashboard owns its responsive sidebar and header.
+  
   if (pathname === "/dashboard/member") {
     return <>{children}</>;
   }
 
   return (
     <div className="min-h-screen bg-[#FAF3E9]">
-      {/* Sidebar */}
+  
       <DashboardSidebar />
 
       <DashboardHeader />
 
-      {/* Main Content */}
       <main className="ml-[264px] min-h-screen pt-[72px]">
         {children}
       </main>
