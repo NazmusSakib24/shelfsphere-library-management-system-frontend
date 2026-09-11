@@ -9,6 +9,7 @@ export interface MemberBook {
   id: number;
   title: string;
   author?: string;
+  imageUrl?: string | null;
   categories?: MemberCategory[];
 }
 

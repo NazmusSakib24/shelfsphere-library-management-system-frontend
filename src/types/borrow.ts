@@ -6,6 +6,7 @@ export interface BorrowBook {
   isbn?: string;
   title: string;
   author: string;
+  imageUrl?: string | null;
   description?: string | null;
   totalCopies?: number;
   availableCopies?: number;

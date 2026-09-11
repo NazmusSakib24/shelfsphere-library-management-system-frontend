@@ -2,12 +2,17 @@
 "use client";
 
 import {
+  BookOpen,
   RotateCcw,
   Eye,
 } from "lucide-react";
 
 import { BorrowRecord } from "@/types/borrow";
 import FineBadge from "./FineBadge";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3000";
 
 interface BorrowTableProps {
   borrows: BorrowRecord[];
@@ -146,18 +151,32 @@ export default function BorrowTable({
                   >
                     {/* Book */}
                     <td className="px-6 py-5">
-                      <div>
-                        <p className="font-semibold text-[#4A362A]">
-                          {borrow.book
-                            ?.title ??
-                            "Unknown Book"}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        {borrow.book?.imageUrl ? (
+                          <img
+                            src={`${API_URL}${borrow.book.imageUrl}`}
+                            alt={borrow.book.title}
+                            className="h-16 w-12 shrink-0 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-16 w-12 shrink-0 items-center justify-center rounded-lg bg-[#F1E7DA]">
+                            <BookOpen className="h-5 w-5 text-[#A08E7F]" />
+                          </div>
+                        )}
 
-                        <p className="mt-1 text-xs text-[#8A7868]">
-                          {borrow.book
-                            ?.author ??
-                            "Unknown Author"}
-                        </p>
+                        <div>
+                          <p className="font-semibold text-[#4A362A]">
+                            {borrow.book
+                              ?.title ??
+                              "Unknown Book"}
+                          </p>
+
+                          <p className="mt-1 text-xs text-[#8A7868]">
+                            {borrow.book
+                              ?.author ??
+                              "Unknown Author"}
+                          </p>
+                        </div>
                       </div>
                     </td>
 

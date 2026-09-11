@@ -7,6 +7,10 @@ import {
 
 import { MemberBorrow } from "@/services/member-dashboard";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3000";
+
 interface BorrowedBooksProps {
   books: MemberBorrow[];
 }
@@ -67,12 +71,20 @@ export default function BorrowedBooks({
                 className="flex flex-col gap-4 p-5 transition hover:bg-[#FCF6EF] md:flex-row md:items-center md:justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F3E0D5]">
-                    <FaBookOpen
-                      className="text-[#C97B4A]"
-                      size={17}
+                  {borrow.book.imageUrl ? (
+                    <img
+                      src={`${API_URL}${borrow.book.imageUrl}`}
+                      alt={borrow.book.title}
+                      className="h-16 w-12 shrink-0 rounded-lg object-cover"
                     />
-                  </div>
+                  ) : (
+                    <div className="flex h-16 w-12 shrink-0 items-center justify-center rounded-lg bg-[#F3E0D5]">
+                      <FaBookOpen
+                        className="text-[#C97B4A]"
+                        size={17}
+                      />
+                    </div>
+                  )}
 
                   <div>
                     <h3 className="font-semibold text-[#4A362A]">
