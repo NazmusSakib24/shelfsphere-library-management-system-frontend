@@ -28,16 +28,16 @@ export default function DashboardLayout({
     if (!loading && user) {
       const isMemberDashboard =
         pathname === "/dashboard/member";
+      
+      if(user.role === "LIBRARIAN" && pathname === "/dashboard/users"){
+        router.push("/dashboard");
+      }
 
-      if (
-        user.role === "MEMBER" &&
-        !isMemberDashboard
+      else if (user.role === "MEMBER" && !isMemberDashboard
       ) {
         router.push("/dashboard/member");
-      } else if (
-        (user.role === "ADMIN" ||
-          user.role === "LIBRARIAN") &&
-        isMemberDashboard
+      } 
+      else if ((user.role === "ADMIN" || user.role === "LIBRARIAN") && isMemberDashboard
       ) {
         router.push("/dashboard");
       }
@@ -58,6 +58,10 @@ export default function DashboardLayout({
     return null;
   }
 
+  if(user.role === "LIBRARIAN" && pathname === "/dashboard/users"){
+    return null;
+  }
+
   
   if (pathname === "/dashboard/member") {
     return <>{children}</>;
@@ -70,7 +74,7 @@ export default function DashboardLayout({
 
       {pathname !== "/dashboard/users" && <DashboardHeader />}
 
-      <main className="ml-[264px] min-h-screen pt-[72px]">
+      <main className={`ml-[264px] min-h-screen ${pathname !== "/dashboard/users" ? "pt-[72px]" : ""}`}>
         {children}
       </main>
     </div>
