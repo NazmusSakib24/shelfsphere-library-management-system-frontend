@@ -2,11 +2,37 @@
 
 import { useEffect, useState } from "react";
 import { MoreVertical, Plus, Search } from "lucide-react";
+import { z } from "zod";
+import {createUser,getUsers,type User,} from "@/services/users";
+import { CgPassword } from "react-icons/cg";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-  getUsers,
-  type User,
-} from "@/services/users";
+const userSchema = z.object({
+	fullName: z
+	.string()
+	.min(2,"Full name is required"),
+
+	email: z
+	.string()
+	.email("Enter a valid email address"),
+
+	password: z
+	.string()
+	.min(6,"Password must be at least 6 characters"),
+
+	phone: z
+	.string()
+	.optional(),
+
+	role: z.enum([
+		"ADMIN",
+		"LIBRARIAN",
+		"MEMBER",
+	]),
+});
+
+type UserFormData = z.infer<typeof userSchema>;
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -14,11 +40,16 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [newUserRole, setNewUserRole] = useState("MEMBER");
+  const{register,handleSubmit,reset,formState: {errors},} = useForm<UserFormData>({
+	resolver:zodResolver(userSchema),
+	defaultValues:{
+		fullName:"",
+		email:"",
+		password:"",
+		phone:"",
+		role:"MEMBER",
+	}
+  });
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -35,8 +66,26 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
-  if (loading) {
-    return <div>Loading users...</div>;
+
+  const handleAddUser = async (data: UserFormData) => {
+	try{
+		const newUser = await createUser(data);
+
+		setUsers((currentUsers)=>[
+			...currentUsers,
+			newUser,
+		]);
+
+		reset();
+		setShowForm(false);
+	}
+	catch(error){
+		console.error("Failed to add new user", error);
+	}
+  };
+
+  if(loading){
+	return <div>Loading users...</div>
   }
 
   const filteredUsers = users.filter((user) => {
@@ -98,44 +147,53 @@ export default function UsersPage() {
 					Add User
 				</h2>
 
-				<form className="grid gap-4 md:grid-cols-2">
+				<form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit(handleAddUser)}>
 					<div>
-						<label className="mb-1 block text-sm font-medium">
-							Full Name
-						</label>
+						<label className="mb-1 block text-sm font-medium">Full Name</label>
 						<input
 							type="text"
-							value={fullName}
-							onChange={(e) => setFullName(e.target.value)}
+							{...register("fullName")}
 							className="w-full rounded-lg border px-3 py-2 outline-none"
 							placeholder="Enter full name"
 						/>
+
+						{errors.fullName &&(
+							<p className="mt-1 text-sm text-red-500">
+								{errors.fullName.message}
+							</p>
+						)}
 					</div>
 
 					<div>
-						<label className="mb-1 block text-sm font-medium">
-							Email
-						</label>
+						<label className="mb-1 block text-sm font-medium">Email</label>
 						<input
 							type="email"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							{...register("email")}
 							className="w-full rounded-lg border px-3 py-2 outline-none"
 							placeholder="Enter email"
 						/>
+
+						{errors.email &&(
+							<p className="mt-1 text-sm text-red-500">
+								{errors.email.message}
+							</p>
+						)}
 					</div>
 
 					<div>
-						<label className="mb-1 block text-sm font-medium">
-						Password
-						</label>
+						<label className="mb-1 block text-sm font-medium">Password</label>
 						<input
 						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						{...register("password")}
 						className="w-full rounded-lg border px-3 py-2 outline-none"
 						placeholder="Enter password"
 						/>
+
+						{errors.password &&(
+							<p className="mt-1 text-sm text-red-500">
+								{errors.password.message}
+							</p>
+						)}
 					</div>
 
 					<div>
@@ -144,11 +202,16 @@ export default function UsersPage() {
 						</label>
 						<input
 						type="text"
-						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
+						{...register("phone")}
 						className="w-full rounded-lg border px-3 py-2 outline-none"
 						placeholder="Enter phone number"
 						/>
+
+						{errors.phone &&(
+							<p className="mt-1 text-sm text-red-500">
+								{errors.phone.message}
+							</p>
+						)}
 					</div>
 
 					<div>
@@ -156,8 +219,7 @@ export default function UsersPage() {
 						Role
 						</label>
 						<select
-						value={newUserRole}
-						onChange={(e) => setNewUserRole(e.target.value)}
+						{...register("role")}
 						className="w-full rounded-lg border bg-white px-3 py-2 outline-none"
 						>
 						<option value="MEMBER">Member</option>
@@ -173,9 +235,9 @@ export default function UsersPage() {
 							className="rounded-lg border px-4 py-2"
 							>
 							Cancel
-							</button>
+						</button>
 
-							<button
+						<button
 							type="submit"
 							className="rounded-lg bg-orange-500 px-4 py-2 text-white"
 							>
