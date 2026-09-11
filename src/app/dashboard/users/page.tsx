@@ -1,38 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MoreVertical, Plus, Search } from "lucide-react";
-import { z } from "zod";
-import {createUser,getUsers,type User,} from "@/services/users";
-import { CgPassword } from "react-icons/cg";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MoreVertical, Plus, Search } from "lucide-react";
 
-const userSchema = z.object({
-	fullName: z
-	.string()
-	.min(2,"Full name is required"),
+import {
+  createUser,
+  deleteUser,
+  getUsers,
+  updateUser,
+  type User,
+} from "@/services/users";
 
-	email: z
-	.string()
-	.email("Enter a valid email address"),
-
-	password: z
-	.string()
-	.min(6,"Password must be at least 6 characters"),
-
-	phone: z
-	.string()
-	.optional(),
-
-	role: z.enum([
-		"ADMIN",
-		"LIBRARIAN",
-		"MEMBER",
-	]),
+const createUserSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email("Enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  phone: z.string().optional(),
+  role: z.enum(["ADMIN", "LIBRARIAN", "MEMBER"]),
 });
 
-type UserFormData = z.infer<typeof userSchema>;
+const updateUserSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email("Enter a valid email address"),
+  phone: z.string().optional(),
+  role: z.enum(["ADMIN", "LIBRARIAN", "MEMBER"]),
+});
+
+type CreateUserFormData = z.infer<typeof createUserSchema>;
+type UpdateUserFormData = z.infer<typeof updateUserSchema>;
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -40,15 +38,32 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const{register,handleSubmit,reset,formState: {errors},} = useForm<UserFormData>({
-	resolver:zodResolver(userSchema),
-	defaultValues:{
-		fullName:"",
-		email:"",
-		password:"",
-		phone:"",
-		role:"MEMBER",
-	}
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
+
+  const {
+    register: registerCreate,
+    handleSubmit: handleCreateSubmit,
+    reset: resetCreate,
+    formState: { errors: createErrors },
+  } = useForm<CreateUserFormData>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      password: "",
+      phone: "",
+      role: "MEMBER",
+    },
+  });
+
+  const {
+    register: registerUpdate,
+    handleSubmit: handleUpdateSubmit,
+    reset: resetUpdate,
+    formState: { errors: updateErrors },
+  } = useForm<UpdateUserFormData>({
+    resolver: zodResolver(updateUserSchema),
   });
 
   useEffect(() => {
@@ -66,26 +81,84 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
+  const handleAddUser = async (data: CreateUserFormData) => {
+    try {
+      const newUser = await createUser(data);
 
-  const handleAddUser = async (data: UserFormData) => {
-	try{
-		const newUser = await createUser(data);
+      setUsers((currentUsers) => [
+        ...currentUsers,
+        newUser,
+      ]);
 
-		setUsers((currentUsers)=>[
-			...currentUsers,
-			newUser,
-		]);
-
-		reset();
-		setShowForm(false);
-	}
-	catch(error){
-		console.error("Failed to add new user", error);
-	}
+      resetCreate();
+      setShowForm(false);
+    } catch (error) {
+      console.error("Failed to create user:", error);
+    }
   };
 
-  if(loading){
-	return <div>Loading users...</div>
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setOpenMenu(null);
+
+    resetUpdate({
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone || "",
+      role: user.role,
+    });
+  };
+
+  const handleUpdateUser = async (data: UpdateUserFormData) => {
+    if (!editingUser) {
+      return;
+    }
+
+    try {
+      const updatedUser = await updateUser(
+        editingUser.id,
+        data,
+      );
+
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user.id === editingUser.id
+            ? updatedUser
+            : user,
+        ),
+      );
+
+      resetUpdate();
+      setEditingUser(null);
+    } catch (error) {
+      console.error("Failed to update user:", error);
+    }
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this user?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteUser(id);
+
+      setUsers((currentUsers) =>
+        currentUsers.filter((user) => user.id !== id),
+      );
+
+      setOpenMenu(null);
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading users...</div>;
   }
 
   const filteredUsers = users.filter((user) => {
@@ -103,13 +176,20 @@ export default function UsersPage() {
   return (
     <div className="p-6 pt-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">
-          Users
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold">
+            Users
+          </h1>
 
-		<button type="button" onClick={()=>setShowForm(true)} className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-white">
-			<Plus className="size-4"/>Add User
-		</button>
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-white"
+          >
+            <Plus className="size-4" />
+            Add User
+          </button>
+        </div>
 
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -141,112 +221,223 @@ export default function UsersPage() {
         </div>
       </div>
 
-	  {showForm && (
-			<div className="mb-6 rounded-xl border bg-white p-6">
-				<h2 className="mb-4 text-lg font-semibold">
-					Add User
-				</h2>
+      {showForm && (
+        <div className="mb-6 rounded-xl border bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold">
+            Add User
+          </h2>
 
-				<form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit(handleAddUser)}>
-					<div>
-						<label className="mb-1 block text-sm font-medium">Full Name</label>
-						<input
-							type="text"
-							{...register("fullName")}
-							className="w-full rounded-lg border px-3 py-2 outline-none"
-							placeholder="Enter full name"
-						/>
+          <form
+            onSubmit={handleCreateSubmit(handleAddUser)}
+            className="grid gap-4 md:grid-cols-2"
+          >
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Full Name
+              </label>
 
-						{errors.fullName &&(
-							<p className="mt-1 text-sm text-red-500">
-								{errors.fullName.message}
-							</p>
-						)}
-					</div>
+              <input
+                type="text"
+                {...registerCreate("fullName")}
+                className="w-full rounded-lg border px-3 py-2 outline-none"
+                placeholder="Enter full name"
+              />
 
-					<div>
-						<label className="mb-1 block text-sm font-medium">Email</label>
-						<input
-							type="email"
-							{...register("email")}
-							className="w-full rounded-lg border px-3 py-2 outline-none"
-							placeholder="Enter email"
-						/>
+              {createErrors.fullName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {createErrors.fullName.message}
+                </p>
+              )}
+            </div>
 
-						{errors.email &&(
-							<p className="mt-1 text-sm text-red-500">
-								{errors.email.message}
-							</p>
-						)}
-					</div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Email
+              </label>
 
-					<div>
-						<label className="mb-1 block text-sm font-medium">Password</label>
-						<input
-						type="password"
-						{...register("password")}
-						className="w-full rounded-lg border px-3 py-2 outline-none"
-						placeholder="Enter password"
-						/>
+              <input
+                type="email"
+                {...registerCreate("email")}
+                className="w-full rounded-lg border px-3 py-2 outline-none"
+                placeholder="Enter email"
+              />
 
-						{errors.password &&(
-							<p className="mt-1 text-sm text-red-500">
-								{errors.password.message}
-							</p>
-						)}
-					</div>
+              {createErrors.email && (
+                <p className="mt-1 text-sm text-red-500">
+                  {createErrors.email.message}
+                </p>
+              )}
+            </div>
 
-					<div>
-						<label className="mb-1 block text-sm font-medium">
-						Phone
-						</label>
-						<input
-						type="text"
-						{...register("phone")}
-						className="w-full rounded-lg border px-3 py-2 outline-none"
-						placeholder="Enter phone number"
-						/>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Password
+              </label>
 
-						{errors.phone &&(
-							<p className="mt-1 text-sm text-red-500">
-								{errors.phone.message}
-							</p>
-						)}
-					</div>
+              <input
+                type="password"
+                {...registerCreate("password")}
+                className="w-full rounded-lg border px-3 py-2 outline-none"
+                placeholder="Enter password"
+              />
 
-					<div>
-						<label className="mb-1 block text-sm font-medium">
-						Role
-						</label>
-						<select
-						{...register("role")}
-						className="w-full rounded-lg border bg-white px-3 py-2 outline-none"
-						>
-						<option value="MEMBER">Member</option>
-						<option value="LIBRARIAN">Librarian</option>
-						<option value="ADMIN">Admin</option>
-						</select>
-					</div>
+              {createErrors.password && (
+                <p className="mt-1 text-sm text-red-500">
+                  {createErrors.password.message}
+                </p>
+              )}
+            </div>
 
-					<div className="flex items-end gap-3">
-						<button
-							type="button"
-							onClick={() => setShowForm(false)}
-							className="rounded-lg border px-4 py-2"
-							>
-							Cancel
-						</button>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Phone
+              </label>
 
-						<button
-							type="submit"
-							className="rounded-lg bg-orange-500 px-4 py-2 text-white"
-							>
-							Add User
-						</button>
-					</div>
-				</form>
-			</div>
-		)}
+              <input
+                type="text"
+                {...registerCreate("phone")}
+                className="w-full rounded-lg border px-3 py-2 outline-none"
+                placeholder="Enter phone number"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Role
+              </label>
+
+              <select
+                {...registerCreate("role")}
+                className="w-full rounded-lg border bg-white px-3 py-2 outline-none"
+              >
+                <option value="MEMBER">Member</option>
+                <option value="LIBRARIAN">
+                  Librarian
+                </option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            <div className="flex items-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  resetCreate();
+                  setShowForm(false);
+                }}
+                className="rounded-lg border px-4 py-2"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="rounded-lg bg-orange-500 px-4 py-2 text-white"
+              >
+                Add User
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {editingUser && (
+        <div className="mb-6 rounded-xl border bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold">
+            Edit User
+          </h2>
+
+          <form
+            onSubmit={handleUpdateSubmit(handleUpdateUser)}
+            className="grid gap-4 md:grid-cols-2"
+          >
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Full Name
+              </label>
+
+              <input
+                type="text"
+                {...registerUpdate("fullName")}
+                className="w-full rounded-lg border px-3 py-2 outline-none"
+              />
+
+              {updateErrors.fullName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {updateErrors.fullName.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Email
+              </label>
+
+              <input
+                type="email"
+                {...registerUpdate("email")}
+                className="w-full rounded-lg border px-3 py-2 outline-none"
+              />
+
+              {updateErrors.email && (
+                <p className="mt-1 text-sm text-red-500">
+                  {updateErrors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Phone
+              </label>
+
+              <input
+                type="text"
+                {...registerUpdate("phone")}
+                className="w-full rounded-lg border px-3 py-2 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Role
+              </label>
+
+              <select
+                {...registerUpdate("role")}
+                className="w-full rounded-lg border bg-white px-3 py-2 outline-none"
+              >
+                <option value="MEMBER">Member</option>
+                <option value="LIBRARIAN">
+                  Librarian
+                </option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            <div className="flex items-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  resetUpdate();
+                  setEditingUser(null);
+                }}
+                className="rounded-lg border px-4 py-2"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="rounded-lg bg-orange-500 px-4 py-2 text-white"
+              >
+                Update User
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="rounded-xl border bg-white overflow-hidden">
         <table className="w-full">
@@ -288,13 +479,44 @@ export default function UsersPage() {
                   {user.email}
                 </td>
 
-                <td className="p-4">
+                <td className="relative p-4">
                   <button
                     type="button"
+                    onClick={() =>
+                      setOpenMenu(
+                        openMenu === user.id
+                          ? null
+                          : user.id,
+                      )
+                    }
                     className="p-2"
                   >
                     <MoreVertical className="size-4" />
                   </button>
+
+                  {openMenu === user.id && (
+                    <div className="absolute right-4 top-12 z-10 w-32 rounded-lg border bg-white shadow-md">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleEditUser(user)
+                        }
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-50"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteUser(user.id)
+                        }
+                        className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

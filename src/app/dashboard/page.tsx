@@ -69,7 +69,6 @@ export default function DashboardPage() {
       <main className="min-h-screen px-8 pb-10 pt-8">
         <div className="p-8">
 
-          {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-[#2E211A]">
               Dashboard
@@ -87,7 +86,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Statistics */}
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
             <StatCard
@@ -139,7 +137,6 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* Charts */}
           <div className="mt-6 grid gap-6 xl:grid-cols-3">
 
             <div className="xl:col-span-2">
@@ -154,7 +151,6 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* Recent Activity */}
           <div className="mt-6">
             <RecentActivity
               activities={
