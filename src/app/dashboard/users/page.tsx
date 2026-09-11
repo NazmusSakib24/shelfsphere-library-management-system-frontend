@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MoreVertical, Search } from "lucide-react";
+import { MoreVertical, Plus, Search } from "lucide-react";
 
 import {
   getUsers,
@@ -13,6 +13,12 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("all");
+  const [showForm, setShowForm] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [newUserRole, setNewUserRole] = useState("MEMBER");
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -52,6 +58,10 @@ export default function UsersPage() {
           Users
         </h1>
 
+		<button type="button" onClick={()=>setShowForm(true)} className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-white">
+			<Plus className="size-4"/>Add User
+		</button>
+
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500" />
@@ -81,6 +91,100 @@ export default function UsersPage() {
           </select>
         </div>
       </div>
+
+	  {showForm && (
+			<div className="mb-6 rounded-xl border bg-white p-6">
+				<h2 className="mb-4 text-lg font-semibold">
+					Add User
+				</h2>
+
+				<form className="grid gap-4 md:grid-cols-2">
+					<div>
+						<label className="mb-1 block text-sm font-medium">
+							Full Name
+						</label>
+						<input
+							type="text"
+							value={fullName}
+							onChange={(e) => setFullName(e.target.value)}
+							className="w-full rounded-lg border px-3 py-2 outline-none"
+							placeholder="Enter full name"
+						/>
+					</div>
+
+					<div>
+						<label className="mb-1 block text-sm font-medium">
+							Email
+						</label>
+						<input
+							type="email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							className="w-full rounded-lg border px-3 py-2 outline-none"
+							placeholder="Enter email"
+						/>
+					</div>
+
+					<div>
+						<label className="mb-1 block text-sm font-medium">
+						Password
+						</label>
+						<input
+						type="password"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						className="w-full rounded-lg border px-3 py-2 outline-none"
+						placeholder="Enter password"
+						/>
+					</div>
+
+					<div>
+						<label className="mb-1 block text-sm font-medium">
+						Phone
+						</label>
+						<input
+						type="text"
+						value={phone}
+						onChange={(e) => setPhone(e.target.value)}
+						className="w-full rounded-lg border px-3 py-2 outline-none"
+						placeholder="Enter phone number"
+						/>
+					</div>
+
+					<div>
+						<label className="mb-1 block text-sm font-medium">
+						Role
+						</label>
+						<select
+						value={newUserRole}
+						onChange={(e) => setNewUserRole(e.target.value)}
+						className="w-full rounded-lg border bg-white px-3 py-2 outline-none"
+						>
+						<option value="MEMBER">Member</option>
+						<option value="LIBRARIAN">Librarian</option>
+						<option value="ADMIN">Admin</option>
+						</select>
+					</div>
+
+					<div className="flex items-end gap-3">
+						<button
+							type="button"
+							onClick={() => setShowForm(false)}
+							className="rounded-lg border px-4 py-2"
+							>
+							Cancel
+							</button>
+
+							<button
+							type="submit"
+							className="rounded-lg bg-orange-500 px-4 py-2 text-white"
+							>
+							Add User
+						</button>
+					</div>
+				</form>
+			</div>
+		)}
 
       <div className="rounded-xl border bg-white overflow-hidden">
         <table className="w-full">
