@@ -68,7 +68,7 @@ export default function DashboardLayout({
   
       <DashboardSidebar />
 
-      <DashboardHeader />
+      {pathname !== "/dashboard/users" && <DashboardHeader />}
 
       <main className="ml-[264px] min-h-screen pt-[72px]">
         {children}
