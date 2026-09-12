@@ -27,7 +27,7 @@ export default function DashboardLayout({
 
     if (!loading && user) {
       const isMemberDashboard =
-        pathname === "/dashboard/member";
+        pathname.startsWith("/dashboard/member");
       
       if(user.role === "LIBRARIAN" && pathname === "/dashboard/users"){
         router.push("/dashboard");
@@ -63,7 +63,7 @@ export default function DashboardLayout({
   }
 
   
-  if (pathname === "/dashboard/member") {
+  if (pathname.startsWith("/dashboard/member")) {
     return <>{children}</>;
   }
 

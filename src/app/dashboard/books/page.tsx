@@ -32,7 +32,13 @@ const API_URL =
 
 
 
-export default function BooksPage() {
+interface BooksPageProps {
+  memberView?: boolean;
+}
+
+export default function BooksPage({
+  memberView = false,
+}: BooksPageProps) {
   const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -388,8 +394,8 @@ export default function BooksPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF3E9]">
-      <DashboardSidebar />
-      <DashboardHeader />
+      {!memberView && <DashboardSidebar />}
+      {!memberView && <DashboardHeader />}
 
       <main className="min-h-screen px-8 pb-10 pt-8">
         <div className="px-8 pb-12">
@@ -409,13 +415,15 @@ export default function BooksPage() {
                 </p>
               </div>
 
-              <button
-                onClick={openAddForm}
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#C97B4A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#B96C3D]"
-              >
-                <Plus className="h-4 w-4" />
-                Add Book
-              </button>
+              {!memberView && (
+                <button
+                  onClick={openAddForm}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-[#C97B4A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#B96C3D]"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Book
+                </button>
+              )}
 
             </div>
 
@@ -707,6 +715,7 @@ export default function BooksPage() {
                          
 
 
+                          {!memberView && (
                           <div className="flex gap-1">
 
                             <button
@@ -730,6 +739,7 @@ export default function BooksPage() {
                             </button>
 
                           </div>
+                          )}
 
                         </div>
 
@@ -772,9 +782,11 @@ export default function BooksPage() {
                           Categories
                         </th>
 
-                        <th className="px-5 py-4 text-right">
-                          Actions
-                        </th>
+                        {!memberView && (
+                          <th className="px-5 py-4 text-right">
+                            Actions
+                          </th>
+                        )}
                       </tr>
 
                     </thead>
@@ -850,6 +862,7 @@ export default function BooksPage() {
 
                             </td>
 
+                            {!memberView && (
                             <td className="px-5 py-4">
 
                               <div className="flex justify-end gap-1">
@@ -875,6 +888,7 @@ export default function BooksPage() {
                               </div>
 
                             </td>
+                            )}
 
                           </tr>
                         );
@@ -913,7 +927,7 @@ export default function BooksPage() {
           
 
 
-          {showForm && (
+          {!memberView && showForm && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
 
               <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] shadow-2xl">

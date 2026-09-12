@@ -19,7 +19,6 @@ import {
 import MemberStats from "@/components/member-dashboard/MemberStats";
 import BorrowedBooks from "@/components/member-dashboard/BorrowedBooks";
 import Reservations from "@/components/member-dashboard/Reservations";
-import Recommendations from "@/components/member-dashboard/Recommendations";
 import ActivityFeed from "@/components/member-dashboard/ActivityFeed";
 
 import {
@@ -169,6 +168,14 @@ export default function MemberDashboardPage() {
             </Link>
 
             <Link
+              href="/dashboard/member/books"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#6D594C] transition hover:bg-[#E9DDCE]"
+            >
+              <FaBook size={15} />
+              Books
+            </Link>
+
+            <Link
               href="#borrowed"
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#6D594C] transition hover:bg-[#E9DDCE]"
             >
@@ -311,13 +318,6 @@ export default function MemberDashboardPage() {
 
             <Reservations
               reservations={data.reservations}
-            />
-          </div>
-
-          {/* Recommendations */}
-          <div className="mt-6">
-            <Recommendations
-              books={data.recommendations}
             />
           </div>
 

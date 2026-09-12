@@ -53,7 +53,6 @@ export interface MemberDashboard {
 
   currentBorrows: MemberBorrow[];
   reservations: MemberReservation[];
-  recommendations: MemberBook[];
   recentActivity: MemberActivity[];
   fines: MemberFine[];
 }
@@ -74,9 +73,6 @@ export const getMemberDashboard =
         : [],
       reservations: Array.isArray(data.reservations)
         ? data.reservations
-        : [],
-      recommendations: Array.isArray(data.recommendations)
-        ? data.recommendations
         : [],
       recentActivity: Array.isArray(data.recentActivity)
         ? data.recentActivity
