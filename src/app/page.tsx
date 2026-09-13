@@ -1,60 +1,66 @@
-import Link from 'next/link';
-import { ArrowRight, BookOpen, Library, Search, Sparkles, Users } from 'lucide-react';
+import {
+  FiArrowUpRight,
+  FiBookOpen,
+  FiChevronRight,
+  FiClock,
+  FiCommand,
+  FiSearch,
+  FiUsers,
+} from "react-icons/fi";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f4f1ea]">
-      <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
-        <header className="flex items-center justify-between border-b border-[var(--line)] py-5">
-          <Link href="/" className="flex items-center gap-3" aria-label="ShelfSphere home">
-            <span className="brand-mark"><BookOpen size={18} /></span>
-            <span className="brand-name">ShelfSphere</span>
-          </Link>
-          <nav className="hidden items-center gap-8 text-sm md:flex">
-            <a href="#discover" className="nav-link">Discover</a>
-            <a href="#about" className="nav-link">About the library</a>
-            <Link href="/login" className="nav-link">Log in</Link>
-            <Link href="/register" className="button button-dark px-5">Join ShelfSphere <ArrowRight size={15} /></Link>
-          </nav>
-          <Link href="/login" className="button button-dark px-4 text-sm md:hidden">Log in</Link>
-        </header>
+    <main className="min-h-screen overflow-hidden px-5 pb-10 sm:px-8 lg:px-12">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between py-6">
+        <Link href="/" className="flex items-center gap-3" aria-label="ShelfSphere home">
+          <span className="brand-mark"><FiBookOpen size={18} /></span>
+          <span className="brand-name">ShelfSphere</span>
+        </Link>
+        <div className="flex items-center gap-3 text-sm font-semibold">
+          <Link className="button button-dark" href="/login">Sign in</Link>
+          <a className="button button-dark" href="/register">Join the library <FiArrowUpRight /></a>
+        </div>
+      </nav>
 
-        <section className="hero-shell">
-          <div className="hero-copy">
-            <div className="eyebrow"><span className="eyebrow-dot" /> Your library, in orbit</div>
-            <h1>Find your next <em>favorite</em> story.</h1>
-            <p className="hero-text">A calmer way to discover books, borrow with confidence, and keep your reading life beautifully organized.</p>
-            <div className="search-box"><Search size={17} /><span>Search the collection</span><span className="shortcut">⌘ K</span></div>
-            <div className="hero-actions">
-              <Link href="/register" className="button button-accent">Create your account <ArrowRight size={16} /></Link>
-              <Link href="/login" className="text-link">Already a member? Sign in <ArrowRight size={15} /></Link>
-            </div>
+      <section className="hero-shell mx-auto max-w-7xl">
+        <div className="hero-copy">
+          <p className="eyebrow"><span className="eyebrow-dot" /> Your library, in orbit</p>
+          <h1>Find your next <em>favorite</em> chapter.</h1>
+          <p className="hero-text">A calmer way to discover, borrow, and keep track of the stories that stay with you.</p>
+          <div className="search-box">
+            <FiSearch size={20} aria-hidden="true" />
+            <span>Search books, authors, or ISBNs</span>
+            <span className="shortcut"><FiCommand size={12} /> K</span>
           </div>
-
-          <div className="hero-art" aria-label="A stack of books in orbit" role="img">
-            <div className="orbit orbit-one" />
-            <div className="orbit orbit-two" />
-            <div className="book-stack" aria-hidden="true">
-              <div className="book book-bottom">THE ART OF<br />SLOW READING</div>
-              <div className="book book-middle">A FIELD GUIDE<br />TO WONDER</div>
-              <div className="book book-top">NEW<br />WORLDS</div>
-            </div>
-            <div className="art-caption"><span className="live-dot" /> A collection that keeps growing</div>
+          <div className="hero-actions">
+            <a href="/dashboard/books" className="button button-accent">Explore the collection <FiArrowUpRight /></a>
+            <a href="/register" className="text-link">Create an account <FiChevronRight /></a>
           </div>
-        </section>
+        </div>
+        <div className="hero-art" aria-label="A stack of books in the ShelfSphere collection">
+          <div className="orbit orbit-one" />
+          <div className="orbit orbit-two" />
+          <div className="book-stack">
+            <div className="book book-top"><span>THE<br />LONG<br />WAY</span></div>
+            <div className="book book-middle"><span>FIELD<br />NOTES</span></div>
+            <div className="book book-bottom"><span>ATLAS OF<br />SMALL THINGS</span></div>
+          </div>
+          <div className="art-caption"><span className="live-dot" /> 18,426 books in orbit</div>
+        </div>
+      </section>
 
-        <section id="discover" className="metrics" aria-label="ShelfSphere highlights">
-          <div className="metric"><Library size={18} /><strong>1,200+</strong><span>stories to explore</span></div>
-          <div className="metric"><Users size={18} /><strong>800+</strong><span>curious members</span></div>
-          <div className="metric"><Sparkles size={18} /><strong>24/7</strong><span>your reading list</span></div>
-          <div id="about" className="metric metric-note"><span>Make room for<br /><strong>one more book.</strong></span><BookOpen size={20} /></div>
-        </section>
+      <section className="metrics mx-auto max-w-7xl" aria-label="Library statistics">
+        <div className="metric"><FiBookOpen /><strong>18,426</strong><span>books to explore</span></div>
+        <div className="metric"><FiUsers /><strong>2,840</strong><span>curious readers</span></div>
+        <div className="metric"><FiClock /><strong>642</strong><span>new this week</span></div>
+        <div className="metric metric-note"><span>Curated for the<br /><strong>curiously minded.</strong></span><FiArrowUpRight /></div>
+      </section>
 
-        <footer className="flex flex-col gap-3 py-8 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 ShelfSphere Library</span>
-          <span>Read widely. Return happily.</span>
-        </footer>
-      </div>
+      <section className="mx-auto mt-10 flex max-w-7xl items-center justify-between border-t border-black/10 pt-6 text-sm">
+        <p className="muted">A shared space for better reading habits.</p>
+        <a className="text-link" href="/dashboard">Open your dashboard <FiChevronRight /></a>
+      </section>
     </main>
   );
 }

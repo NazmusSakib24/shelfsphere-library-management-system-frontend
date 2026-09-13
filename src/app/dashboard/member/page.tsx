@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import {
   FaBook,
   FaBookOpen,
@@ -21,6 +22,7 @@ import BorrowedBooks from "@/components/member-dashboard/BorrowedBooks";
 import Reservations from "@/components/member-dashboard/Reservations";
 import ActivityFeed from "@/components/member-dashboard/ActivityFeed";
 import NotificationMenu from "@/components/dashboard/NotificationMenu";
+import WelcomeHero from "@/components/dashboard/WelcomeHero";
 
 import {
   getMemberDashboard,
@@ -29,6 +31,7 @@ import {
 
 export default function MemberDashboardPage() {
   const router = useRouter();
+
   const [data, setData] =
     useState<MemberDashboard | null>(null);
 
@@ -92,7 +95,9 @@ export default function MemberDashboardPage() {
           </p>
 
           <button
-            onClick={() => window.location.reload()}
+            onClick={() =>
+              window.location.reload()
+            }
             className="mt-5 rounded-lg bg-[#C97B4A] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#B8693D]"
           >
             Try Again
@@ -101,6 +106,30 @@ export default function MemberDashboardPage() {
       </div>
     );
   }
+
+  /*
+   * Calculate books that are due within the
+   * next 7 days.
+   */
+  const dueSoonBooks = data.currentBorrows.filter(
+    (book) => {
+      const dueDate = new Date(book.dueDate);
+      const today = new Date();
+
+      const difference =
+        dueDate.getTime() -
+        today.getTime();
+
+      const daysRemaining =
+        difference /
+        (1000 * 60 * 60 * 24);
+
+      return (
+        daysRemaining >= 0 &&
+        daysRemaining <= 7
+      );
+    },
+  ).length;
 
   return (
     <div className="min-h-screen bg-[#FAF3E9] text-[#4A362A]">
@@ -263,6 +292,7 @@ export default function MemberDashboardPage() {
 
           <div className="flex items-center gap-3">
             <NotificationMenu />
+
             <div className="hidden text-right sm:block">
               <p className="text-sm font-semibold text-[#4A362A]">
                 Member
@@ -284,51 +314,61 @@ export default function MemberDashboardPage() {
 
         {/* Content */}
         <main className="p-4 md:p-8">
-          {/* Welcome */}
-          <div className="mb-8">
-            <div className="rounded-2xl border border-[#E8DCC8] bg-[#F1E7DA] p-6 md:p-8">
-              <p className="text-sm font-medium text-[#8A7567]">
-                Welcome back 👋
-              </p>
 
-              <h1 className="mt-1 text-2xl font-bold text-[#4A362A] md:text-3xl">
-                Your personal library dashboard
-              </h1>
-
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#806B5D]">
-                Keep track of your borrowed books,
-                reservations, fines, reading history,
-                and discover something new to read.
-              </p>
-            </div>
-          </div>
+          {/* NEW WELCOME HERO */}
+          <WelcomeHero
+            userName="Reader"
+            borrowedBooks={
+              data.borrowedBooks
+            }
+            dueSoonBooks={
+              dueSoonBooks
+            }
+          />
 
           {/* Stats */}
           <MemberStats
-            borrowedBooks={data.borrowedBooks}
-            reservedBooks={data.reservedBooks}
-            pendingFines={data.pendingFines}
-            totalFineAmount={data.totalFineAmount}
-            booksRead={data.booksRead}
+            borrowedBooks={
+              data.borrowedBooks
+            }
+            reservedBooks={
+              data.reservedBooks
+            }
+            pendingFines={
+              data.pendingFines
+            }
+            totalFineAmount={
+              data.totalFineAmount
+            }
+            booksRead={
+              data.booksRead
+            }
           />
 
           {/* Borrowed + Reservations */}
           <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
             <BorrowedBooks
-              books={data.currentBorrows}
+              books={
+                data.currentBorrows
+              }
             />
 
             <Reservations
-              reservations={data.reservations}
+              reservations={
+                data.reservations
+              }
             />
           </div>
 
           {/* Activity + Fines */}
           <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
             <ActivityFeed
-              activities={data.recentActivity}
+              activities={
+                data.recentActivity
+              }
             />
 
+            {/* Fines */}
             <section
               id="fines"
               className="rounded-2xl border border-[#EFE5D8] bg-[#FFFDF9] shadow-sm"
@@ -369,35 +409,36 @@ export default function MemberDashboardPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-[#EFE5D8]">
-                  {data.fines.map((fine) => (
-                    <div
-                      key={fine.id}
-                      className="flex items-center justify-between p-5"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-[#4A362A]">
-                          Fine #{fine.id}
-                        </p>
+                  {data.fines.map(
+                    (fine) => (
+                      <div
+                        key={fine.id}
+                        className="flex items-center justify-between p-5"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-[#4A362A]">
+                            Fine #{fine.id}
+                          </p>
 
-                        <p className="mt-1 text-xs text-[#9B8778]">
-                          {new Date(
-                            fine.createdAt,
-                          ).toLocaleDateString()}
-                        </p>
+                          <p className="mt-1 text-xs text-[#9B8778]">
+                            {new Date(
+                              fine.createdAt,
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+
+                        <span className="font-bold text-[#B23B2E]">
+                          {Number(
+                            fine.amount,
+                          ).toFixed(2)}
+                        </span>
                       </div>
-
-                      <span className="font-bold text-[#B23B2E]">
-                        {Number(
-                          fine.amount,
-                        ).toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </section>
           </div>
-
         </main>
       </div>
     </div>

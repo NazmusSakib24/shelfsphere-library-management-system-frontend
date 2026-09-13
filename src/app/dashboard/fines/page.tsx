@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   BookOpen,
-  Plus,
   Search,
 } from "lucide-react";
 
@@ -327,10 +326,6 @@ export default function FinesPage() {
               </p>
             </div>
 
-            <button className="flex items-center gap-2 rounded-xl bg-[#C97B4A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#B96C3D]">
-              <Plus className="h-4 w-4" />
-              New Fine
-            </button>
           </div>
 
           {/* Stats */}
