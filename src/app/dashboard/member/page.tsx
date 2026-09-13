@@ -20,6 +20,7 @@ import MemberStats from "@/components/member-dashboard/MemberStats";
 import BorrowedBooks from "@/components/member-dashboard/BorrowedBooks";
 import Reservations from "@/components/member-dashboard/Reservations";
 import ActivityFeed from "@/components/member-dashboard/ActivityFeed";
+import NotificationMenu from "@/components/dashboard/NotificationMenu";
 
 import {
   getMemberDashboard,
@@ -214,7 +215,7 @@ export default function MemberDashboardPage() {
             </p>
 
             <Link
-              href="#profile"
+              href="/dashboard/member/profile"
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#6D594C] transition hover:bg-[#E9DDCE]"
             >
               <FaUser size={15} />
@@ -261,6 +262,7 @@ export default function MemberDashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <NotificationMenu />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-semibold text-[#4A362A]">
                 Member
@@ -396,31 +398,6 @@ export default function MemberDashboardPage() {
             </section>
           </div>
 
-          {/* Profile placeholder */}
-          <section
-            id="profile"
-            className="mt-6 rounded-2xl border border-[#EFE5D8] bg-[#FFFDF9] p-6 shadow-sm"
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F3E0D5]">
-                <FaUser
-                  className="text-[#C97B4A]"
-                  size={18}
-                />
-              </div>
-
-              <div>
-                <h2 className="font-bold text-[#4A362A]">
-                  My Profile
-                </h2>
-
-                <p className="mt-1 text-sm text-[#8A7567]">
-                  Your profile information can be
-                  managed from the account section.
-                </p>
-              </div>
-            </div>
-          </section>
         </main>
       </div>
     </div>

@@ -11,6 +11,8 @@ export interface FineBorrowRecord {
   status?: "BORROWED" | "RETURNED";
 
   member?: FineMember;
+
+  book?: FineBook;
 }
 
 export interface FineMember {
@@ -19,6 +21,13 @@ export interface FineMember {
   fullName: string;
 
   email: string;
+}
+
+export interface FineBook {
+  id: number;
+  title: string;
+  author?: string;
+  imageUrl?: string | null;
 }
 
 export interface Fine {
