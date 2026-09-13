@@ -636,7 +636,7 @@ export default function BooksPage({
                   return (
                     <div
                       key={book.id}
-                      className="group overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                      className="group w-full max-w-[240px] justify-self-center overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                     >
 
                     

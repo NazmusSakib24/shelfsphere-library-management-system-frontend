@@ -84,7 +84,7 @@ function MemberBooksCatalogue() {
               key={book.id}
               type="button"
               onClick={() => openDetails(book)}
-              className="group overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#C97B4A] focus:ring-offset-2"
+              className="group w-full max-w-[240px] justify-self-center overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#C97B4A] focus:ring-offset-2"
             >
               <div className="book-display relative aspect-[2/3] bg-[#F1E7DA]">
                 <div className="book-3d">
