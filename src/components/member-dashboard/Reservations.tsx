@@ -7,6 +7,10 @@ import {
 
 import { MemberReservation } from "@/services/member-dashboard";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3000";
+
 interface ReservationsProps {
   reservations: MemberReservation[];
 }
@@ -59,12 +63,20 @@ export default function Reservations({
               className="flex items-center justify-between p-5 transition hover:bg-[#FCF6EF]"
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#E8EBD9]">
-                  <FaBookmark
-                    className="text-[#6B7A4F]"
-                    size={15}
+                {reservation.book.imageUrl ? (
+                  <img
+                    src={`${API_URL}${reservation.book.imageUrl}`}
+                    alt={reservation.book.title}
+                    className="h-14 w-10 shrink-0 rounded-lg object-cover"
                   />
-                </div>
+                ) : (
+                  <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E8EBD9]">
+                    <FaBookmark
+                      className="text-[#6B7A4F]"
+                      size={15}
+                    />
+                  </div>
+                )}
 
                 <div>
                   <h3 className="font-medium text-[#4A362A]">
@@ -76,6 +88,19 @@ export default function Reservations({
                       {reservation.book.author}
                     </p>
                   )}
+
+                  <span
+                    className={`mt-2 inline-block rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                      reservation.status === "APPROVED"
+                        ? "bg-[#E5EBD9] text-[#59683E]"
+                        : reservation.status === "REJECTED"
+                          ? "bg-[#F6DEDA] text-[#B23B2E]"
+                          : "bg-[#F7F0DD] text-[#A47A19]"
+                    }`}
+                  >
+                    {reservation.status.charAt(0) +
+                      reservation.status.slice(1).toLowerCase()}
+                  </span>
                 </div>
               </div>
 

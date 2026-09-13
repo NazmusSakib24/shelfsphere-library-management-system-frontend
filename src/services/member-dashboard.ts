@@ -25,6 +25,7 @@ export interface MemberBorrow {
 export interface MemberReservation {
   id: number;
   reservedAt: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
   book: MemberBook;
 }
 
