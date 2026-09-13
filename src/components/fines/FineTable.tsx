@@ -8,6 +8,10 @@ import {
 
 import { Fine } from "@/types/fine";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3000";
+
 interface FineTableProps {
   fines: Fine[];
   onPay: (id: number) => void;
@@ -33,14 +37,18 @@ export default function FineTable({
   return (
     <div className="overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9]">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] table-fixed">
+        <table className="w-full min-w-[1040px] table-fixed">
           <thead>
             <tr className="border-b border-[#E8DCC8] bg-[#FCF7F0]">
               <th className="w-[28%] px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
                 Borrower
               </th>
 
-              <th className="w-[12%] px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+              <th className="w-[22%] px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
+                Book
+              </th>
+
+              <th className="w-[10%] px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#806F61]">
                 Borrow ID
               </th>
 
@@ -66,7 +74,7 @@ export default function FineTable({
             {fines.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-5 py-12 text-center text-sm text-[#806F61]"
                 >
                   No fines found.
@@ -92,9 +100,35 @@ export default function FineTable({
                     </div>
                   </td>
 
+                  <td className="px-5 py-4 align-middle">
+                    <div className="flex items-center gap-3">
+                      {fine.borrowRecord?.book?.imageUrl ? (
+                        <img
+                          src={`${API_URL}${fine.borrowRecord.book.imageUrl}`}
+                          alt={fine.borrowRecord.book.title}
+                          className="h-12 w-9 shrink-0 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-9 shrink-0 items-center justify-center rounded bg-[#F1E3D2] text-xs text-[#806F61]">
+                          Book
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-[#4A362A]">
+                          {fine.borrowRecord?.book?.title || "Unknown Book"}
+                        </p>
+                        {fine.borrowRecord?.book?.author && (
+                          <p className="mt-1 truncate text-xs text-[#806F61]">
+                            {fine.borrowRecord.book.author}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+
                   <td className="whitespace-nowrap px-5 py-4 align-middle">
-                    <span className="font-medium text-[#4A362A]">
-                      #{fine.borrowRecord?.id}
+                    <span className="rounded-lg bg-[#F1E7DA] px-2.5 py-1.5 text-sm font-semibold text-[#5E4B3D]">
+                      #{fine.borrowRecord?.id ?? "—"}
                     </span>
                   </td>
 

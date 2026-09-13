@@ -6,6 +6,7 @@ export type User = {
   email: string;
   phone?: string | null;
   staffId?: string | null;
+  memberId?: string | null;
   role: "ADMIN" | "LIBRARIAN" | "MEMBER";
 };
 
@@ -23,6 +24,7 @@ export type UpdateUserData = {
   email?: string;
   phone?: string;
   staffId?: string;
+  password?: string;
   role?: "ADMIN" | "LIBRARIAN" | "MEMBER";
 };
 
@@ -43,4 +45,9 @@ export const updateUser = async (id: number,data: UpdateUserData,): Promise<User
 
 export const deleteUser = async (id: number): Promise<void> => {
   await api.delete(`/users/${id}`);
+};
+
+export const getUser = async (id: number): Promise<User> => {
+  const response = await api.get<User>(`/users/${id}`);
+  return response.data;
 };

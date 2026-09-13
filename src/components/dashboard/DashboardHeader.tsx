@@ -5,14 +5,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  FiBell,
-  FiPlus,
   FiSearch,
   FiChevronDown,
   FiUser,
   FiLogOut,
 } from "react-icons/fi";
 import { useAuth } from "@/context/AuthContext";
+import NotificationMenu from "@/components/dashboard/NotificationMenu";
 
 export default function DashboardHeader() {
   const [open, setOpen] = useState(false);
@@ -40,18 +39,8 @@ export default function DashboardHeader() {
 
       <div className="flex items-center gap-5">
 
-        {/* Quick Add */}
-        <button className="flex items-center gap-2 rounded-xl bg-[#C97B4A] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#B86C3E]">
-          <FiPlus />
-          Quick Add
-        </button>
-
         {/* Notification */}
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#6B5B4D] hover:bg-[#F3EAE0]">
-          <FiBell className="text-xl" />
-
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#B23B2E]" />
-        </button>
+        <NotificationMenu />
 
         {/* User */}
         <div className="relative">
@@ -78,7 +67,7 @@ export default function DashboardHeader() {
 
           {open && (
             <div className="absolute right-0 top-14 w-48 rounded-xl border border-[#E8DCC8] bg-white p-2 shadow-lg">
-              <Link href="/member" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#6B5B4D] hover:bg-[#F3EAE0]">
+              <Link href="/dashboard/profile" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#6B5B4D] hover:bg-[#F3EAE0]">
                 <FiUser />
                 View profile
               </Link>

@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { isAxiosError } from "axios";
 
 
 import {
@@ -318,12 +319,16 @@ export default function BooksPage({
 
       closeForm();
     } catch (error) {
-      console.error(error);
+      const apiMessage =
+        isAxiosError<{ message?: string }>(error)
+          ? error.response?.data?.message
+          : undefined;
 
       setError(
-        editingBook
-          ? "Unable to update the book."
-          : "Unable to create the book."
+        apiMessage ||
+          (editingBook
+            ? "Unable to update the book."
+            : "Unable to create the book."),
       );
     } finally {
       setSaving(false);
@@ -635,23 +640,26 @@ export default function BooksPage({
                     >
 
                     
-                      <div className="relative h-64 overflow-hidden bg-[#F1E7DA]">
+                      <div className="book-display relative aspect-[2/3] bg-[#F1E7DA]">
 
-                        {book.imageUrl ? (
-                          <img
-                            src={`${API_URL}${book.imageUrl}`}
-                            alt={book.title}
-                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center">
-                            <BookOpen className="h-16 w-16 text-[#CDBEAF]" />
-                          </div>
-                        )}
+                        <div className="book-3d">
+                          {book.imageUrl ? (
+                            <img
+                              src={`${API_URL}${book.imageUrl}`}
+                              alt={book.title}
+                              className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                            />
+                          ) : (
+                            <div className="book-cover-fallback flex h-full w-full items-center justify-center">
+                              <BookOpen className="h-16 w-16 text-[#CDBEAF]" />
+                            </div>
+                          )}
+                          <span className="book-cover-highlight" aria-hidden="true" />
+                        </div>
 
                       
                         <span
-                          className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ${availability.className}`}
+                          className={`absolute right-3 top-3 z-10 rounded-full px-3 py-1 text-xs font-semibold ${availability.className}`}
                         >
                           {availability.text}
                         </span>

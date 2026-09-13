@@ -94,11 +94,15 @@ export default function BorrowTable({
   return (
     <div className="overflow-hidden rounded-2xl border border-[#E8DCC8] bg-[#FFFDF9] shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1000px] text-left">
+        <table className="w-full min-w-[1100px] text-left">
           <thead className="border-b border-[#E8DCC8] bg-[#F8F0E5]">
             <tr>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
                 Book
+              </th>
+
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
+                Borrow ID
               </th>
 
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-[#7A6A5B]">
@@ -131,7 +135,7 @@ export default function BorrowTable({
             {borrows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-6 py-12 text-center text-sm text-[#7A6A5B]"
                 >
                   No borrow records found.
@@ -178,6 +182,12 @@ export default function BorrowTable({
                           </p>
                         </div>
                       </div>
+                    </td>
+
+                    <td className="whitespace-nowrap px-6 py-5">
+                      <span className="rounded-lg bg-[#F1E7DA] px-2.5 py-1.5 text-sm font-semibold text-[#5E4B3D]">
+                        #{borrow.id}
+                      </span>
                     </td>
 
                     {/* Borrower */}

@@ -4,6 +4,10 @@ import { X } from "lucide-react";
 
 import { Fine } from "@/types/fine";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3000";
+
 interface FineDetailsModalProps {
   fine: Fine | null;
   onClose: () => void;
@@ -74,11 +78,18 @@ export default function FineDetailsModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-[#806F61]">
-                Borrow ID
+                Book
               </p>
-
-              <p className="mt-1 font-semibold text-[#4A362A]">
-                #{fine.borrowRecord?.id}
+              <div className="mt-2 flex items-center gap-3">
+                {fine.borrowRecord?.book?.imageUrl ? (
+                  <img src={`${API_URL}${fine.borrowRecord.book.imageUrl}`} alt={fine.borrowRecord.book.title} className="h-12 w-9 rounded object-cover" />
+                ) : null}
+                <p className="font-semibold text-[#4A362A]">
+                  {fine.borrowRecord?.book?.title || "Unknown Book"}
+                </p>
+              </div>
+              <p className="mt-2 text-xs text-[#806F61]">
+                Borrow ID: #{fine.borrowRecord?.id ?? "—"}
               </p>
             </div>
 

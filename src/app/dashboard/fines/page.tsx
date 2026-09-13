@@ -122,9 +122,14 @@ export default function FinesPage() {
       const fineId =
         String(fine.id);
 
+      const bookTitle =
+        fine.borrowRecord?.book?.title?.toLowerCase() ||
+        "";
+
       return (
         memberName.includes(searchText) ||
         email.includes(searchText) ||
+        bookTitle.includes(searchText) ||
         borrowId.includes(searchText) ||
         fineId.includes(searchText)
       );
@@ -350,7 +355,7 @@ export default function FinesPage() {
                   setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search borrower, email, borrow ID, fine ID..."
+                placeholder="Search borrower, email, book title, fine ID..."
                 className="w-full rounded-xl border border-[#E5D7C7] bg-[#FFFCF7] py-3 pl-12 pr-4 text-sm text-[#4A362A] outline-none placeholder:text-[#A08E7F] focus:border-[#C97B4A]"
               />
             </div>

@@ -38,6 +38,74 @@ body {
 }
 
 .brand-mark svg { transform: rotate(8deg); }
+.book-display {
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  padding: 0.7rem 1.15rem 0.8rem 0.85rem;
+  perspective: 900px;
+  background: radial-gradient(ellipse at 50% 92%, rgba(74, 54, 42, 0.19), transparent 45%), #f1e7da;
+}
+.book-3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: rotateY(-9deg) rotateZ(-1.2deg);
+  transform-style: preserve-3d;
+  transition: transform 260ms ease, filter 260ms ease;
+  filter: drop-shadow(9px 11px 7px rgba(74, 54, 42, 0.23));
+}
+.group:hover .book-3d {
+  transform: rotateY(-6deg) rotateZ(-0.4deg) translateY(-3px);
+  filter: drop-shadow(12px 15px 9px rgba(74, 54, 42, 0.27));
+}
+.book-3d > img,
+.book-cover-fallback {
+  position: relative;
+  z-index: 2;
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(74, 54, 42, 0.28);
+  border-radius: 4px 7px 7px 4px;
+  background: linear-gradient(145deg, #e9ddce, #d1bdab);
+  box-shadow: inset 2px 0 3px rgba(255, 255, 255, 0.24), inset -2px 0 3px rgba(44, 27, 18, 0.14);
+}
+.book-3d::before {
+  position: absolute;
+  z-index: 1;
+  top: 3px;
+  bottom: 3px;
+  left: -9px;
+  width: 10px;
+  border-radius: 4px 0 0 4px;
+  background: linear-gradient(90deg, #593b2a, #a16b4c 45%, #77442e);
+  box-shadow: inset 2px 0 2px rgba(255, 240, 221, 0.17), inset -2px 0 3px rgba(42, 24, 15, 0.34);
+  content: "";
+  transform: rotateY(62deg);
+  transform-origin: right center;
+}
+.book-3d::after {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  right: -10px;
+  bottom: 6px;
+  width: 11px;
+  border-radius: 0 3px 3px 0;
+  background: repeating-linear-gradient(to bottom, #e9ddc8 0 2px, #cdbda8 2px 3px);
+  box-shadow: inset 1px 0 rgba(113, 83, 57, 0.28), 1px 1px 2px rgba(74, 54, 42, 0.17);
+  content: "";
+  transform: rotateY(-64deg);
+  transform-origin: left center;
+}
+.book-cover-highlight {
+  position: absolute;
+  z-index: 3;
+  inset: 1px;
+  border-radius: 4px 7px 7px 4px;
+  background: linear-gradient(118deg, rgba(255, 255, 255, 0.2), transparent 28%, transparent 65%, rgba(255, 255, 255, 0.08));
+  pointer-events: none;
+}
 .brand-name { color: var(--ink); font-size: 1rem; font-weight: 800; letter-spacing: -0.04em; }
 .nav-link { color: var(--muted); transition: color 160ms ease; }
 .nav-link:hover, .text-link:hover { color: var(--accent); }
