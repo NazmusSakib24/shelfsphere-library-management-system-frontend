@@ -50,7 +50,7 @@ export default function ReservationsPage() {
   };
 
   useEffect(() => {
-    loadReservations();
+    void Promise.resolve().then(loadReservations);
   }, []);
 
   const handleDecision = async (
